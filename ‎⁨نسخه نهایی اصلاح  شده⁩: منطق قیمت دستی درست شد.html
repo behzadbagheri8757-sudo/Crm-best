@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>دفتر حساب — حبوبات و خشکبار باقری</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --paper:#FAF7F0;
+    --paper-2:#FFFFFF;
+    --card:#FFFFFF;
+    --ink:#3A322A;
+    --ink-soft:#8a7f6d;
+    --olive:#6B7B4F;
+    --olive-dark:#5c4a30;
+    --gold:#B08D3D;
+    --gold-soft:#DCC98A;
+    --rust:#8B6F47;
+    --amber:#B08D3D;
+    --red:#9B3B2E;
+    --line:#E7DDC7;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0;
+    font-family:'Vazirmatn',Tahoma,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    font-variant-numeric: tabular-nums;
+  }
+  header{
+    padding:22px 20px 16px;
+    text-align:center;
+    border-bottom:2px solid var(--gold-soft);
+    background:var(--paper-2);
+  }
+  header h1{
+    margin:0;
+    font-size:1.5rem;
+    font-weight:800;
+    color:var(--olive-dark);
+    letter-spacing:.3px;
+  }
+  header p{
+    margin:6px 0 0;
+    font-size:.85rem;
+    color:var(--ink-soft);
+  }
+  nav{
+    display:flex;
+    overflow-x:auto;
+    gap:0;
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    z-index:10;
+    -webkit-overflow-scrolling:touch;
+  }
+  nav button{
+    flex:1;
+    min-width:76px;
+    padding:13px 6px;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    font-size:.82rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:.15s;
+    white-space:nowrap;
+  }
+  nav button.active{
+    color:var(--olive-dark);
+    border-bottom-color:var(--gold);
+    background:var(--paper);
+  }
+  main{padding:16px;max-width:720px;margin:0 auto;padding-bottom:80px;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:2px solid var(--gold-soft);
+    border-radius:10px;
+    padding:14px;
+    box-shadow:0 1px 3px rgba(90,70,30,.05);
+  }
+  .card .label{font-size:.75rem;color:var(--ink-soft);margin-bottom:4px;}
+  .card .value{font-size:1.2rem;font-weight:700;}
+  .card.wide{grid-column:1/-1;}
+  .accent-olive{color:var(--olive-dark);}
+  .accent-rust{color:var(--rust);}
+  .accent-red{color:var(--red);}
+  .accent-amber{color:var(--amber);}
+
+  h2.section-title{
+    font-size:1.05rem;
+    margin:22px 0 10px;
+    color:var(--olive-dark);
+    display:flex;align-items:center;gap:8px;
+  }
+  h2.section-title::after{
+    content:"";
+    flex:1;
+    border-bottom:2px dotted var(--line);
+    margin-top:4px;
+  }
+  h3.sub-title{ font-size:.92rem; margin:16px 0 8px; color:var(--olive-dark); }
+
+  .ledger-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    padding:11px 4px;
+    border-bottom:1px dotted var(--line);
+    cursor:pointer;
+  }
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row .name{font-weight:600;white-space:nowrap;}
+  .ledger-row .filler{flex:1;border-bottom:1px dotted var(--line);height:0;margin-bottom:4px;}
+  .ledger-row .amount{font-weight:700;white-space:nowrap;text-align:left;}
+  .ledger-row .sub{font-size:.72rem;color:var(--ink-soft);display:block;font-weight:400;}
+
+  .btn{
+    display:inline-block;
+    background:var(--gold);
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:8px;
+    font-family:inherit;
+    font-weight:600;
+    font-size:.85rem;
+    cursor:pointer;
+  }
+  .btn:active{ opacity:.85; }
+  .btn.secondary{background:transparent;color:var(--olive-dark);border:1px solid var(--gold);}
+  .btn.danger{background:var(--red);}
+  .btn.small{padding:6px 10px;font-size:.75rem;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+
+  .chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .chip{
+    padding:6px 12px;border-radius:20px;border:1px solid var(--line);
+    background:var(--card);font-size:.78rem;color:var(--ink-soft);cursor:pointer;font-family:inherit;
+  }
+  .chip.active{background:var(--olive-dark);color:#fff;border-color:var(--olive-dark);}
+
+  .fab{
+    position:fixed;
+    left:18px;bottom:18px;
+    width:52px;height:52px;
+    border-radius:50%;
+    background:var(--gold);
+    color:#fff;
+    font-size:1.6rem;
+    border:none;
+    box-shadow:0 4px 14px rgba(90,70,30,.25);
+    cursor:pointer;
+    z-index:20;
+  }
+
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(46,42,34,.45);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:30;
+  }
+  .sheet{
+    background:var(--paper);
+    width:100%;max-width:720px;
+    max-height:90vh;overflow-y:auto;
+    border-radius:16px 16px 0 0;
+    padding:20px;
+    border-top:3px solid var(--gold);
+    -webkit-overflow-scrolling:touch;
+  }
+  .sheet h3{margin-top:0;color:var(--olive-dark);padding-left:28px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:.78rem;color:var(--ink-soft);margin-bottom:4px;}
+  .field input, .field select, .field textarea{
+    width:100%;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:inherit;
+    font-size:.9rem;
+    background:var(--card);
+    color:var(--ink);
+  }
+  .field textarea{ resize:vertical; min-height:56px; }
+  .close-x{
+    position:absolute;left:16px;top:14px;
+    background:none;border:none;font-size:1.3rem;color:var(--ink-soft);cursor:pointer;
+    width:32px;height:32px;
+  }
+  .empty{
+    text-align:center;color:var(--ink-soft);padding:30px 10px;font-size:.9rem;
+  }
+  .badge{
+    display:inline-block;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700;
+  }
+  .badge.pending{background:#f3e3c2;color:var(--amber);}
+  .badge.cleared{background:#dfe7d2;color:var(--olive-dark);}
+  .badge.low{background:#f3d3cc;color:var(--red);}
+  .item-mini{font-size:.8rem;color:var(--ink-soft);padding:4px 0;border-bottom:1px dotted var(--line);}
+  .toast{
+    position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+    background:var(--olive-dark);color:#fff;padding:10px 18px;border-radius:20px;
+    font-size:.85rem;z-index:50;opacity:0;transition:.3s;pointer-events:none;
+    max-width:88vw; text-align:center;
+  }
+  .toast.show{opacity:1;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  table th{text-align:right;color:var(--ink-soft);font-weight:600;font-size:.73rem;padding:6px 4px;border-bottom:1px solid var(--line);}
+  table td{padding:8px 4px;border-bottom:1px dotted var(--line);}
+  .confirm-box{ border:1px solid var(--red); background:#fbeeeb; border-radius:10px; padding:12px; font-size:.82rem; margin-bottom:10px; }
+
+  #printArea{display:none;}
+  @media print{
+    @page{ size:A4; margin:14mm; }
+    html, body{background:#fff !important;}
+    body *{visibility:hidden;}
+    .overlay, .sheet, header, nav, .fab, .toast{display:none !important;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{
+      display:block;
+      position:absolute;top:0;right:0;left:0;
+      background:#fff !important;
+      color:#111 !important;
+      font-family:'Vazirmatn',Tahoma,sans-serif;
+      direction:rtl;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+    .inv-doc{ padding:6mm; color:#111; }
+    .inv-head{
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:2px solid #222; padding-bottom:10px; margin-bottom:14px;
+    }
+    .inv-logo{
+      width:60px; height:60px; border:1px solid #999; border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.7rem; color:#888; flex-shrink:0;
+    }
+    .inv-brand{ text-align:center; flex:1; }
+    .inv-brand-name{ font-size:1.3rem; font-weight:800; }
+    .inv-doc-title{ font-size:1rem; margin-top:2px; border:1px solid #333; display:inline-block; padding:2px 14px; border-radius:4px; }
+    .inv-meta{ text-align:left; font-size:.85rem; flex-shrink:0; min-width:130px; }
+    .inv-customer{
+      display:flex; flex-wrap:wrap; gap:4px 20px;
+      border:1px solid #ccc; border-radius:6px;
+      padding:8px 12px; margin-bottom:14px; font-size:.9rem;
+    }
+    .inv-table{ width:100%; border-collapse:collapse; margin-bottom:14px; }
+    .inv-table th, .inv-table td{ border:1px solid #999; padding:7px; font-size:.85rem; text-align:center; }
+    .inv-table thead th{ background:#eee !important; -webkit-print-color-adjust:exact; }
+    .inv-totals{ width:65%; margin-right:auto; margin-left:0; border-collapse:collapse; margin-bottom:24px; }
+    .inv-totals td{ padding:6px 8px; font-size:.9rem; border-bottom:1px solid #ddd; }
+    .inv-totals td:first-child{ color:#444; }
+    .inv-totals td:last-child{ text-align:left; font-weight:600; }
+    .inv-totals .inv-final td{ border-top:2px solid #222; font-size:1.05rem; font-weight:800; padding-top:8px; }
+    .inv-signatures{ display:flex; justify-content:space-between; margin-top:50px; font-size:.85rem; }
+    .inv-signatures > div{ width:40%; text-align:center; }
+    .inv-sig-line{ border-top:1px solid #666; margin-top:36px; }
+  }
+  /* on-screen preview version of the invoice doc, used for image export */
+  .inv-doc.screen-preview{
+    background:#fff;color:#111;direction:rtl;
+    font-family:'Vazirmatn',Tahoma,sans-serif;
+    padding:14px;border-radius:10px;border:1px solid var(--line);
+  }
+  .inv-doc.screen-preview .inv-head{ display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #222; padding-bottom:10px; margin-bottom:14px; }
+  .inv-doc.screen-preview .inv-logo{ width:50px;height:50px;border:1px solid #999;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:#888;flex-shrink:0; }
+  .inv-doc.screen-preview .inv-brand{ text-align:center; flex:1; }
+  .inv-doc.screen-preview .inv-brand-name{ font-size:1.1rem; font-weight:800; }
+  .inv-doc.screen-preview .inv-doc-title{ font-size:.85rem; margin-top:2px; border:1px solid #333; display:inline-block; padding:2px 12px; border-radius:4px; }
+  .inv-doc.screen-preview .inv-meta{ text-align:left; font-size:.78rem; flex-shrink:0; }
+  .inv-doc.screen-preview .inv-customer{ display:flex; flex-wrap:wrap; gap:3px 16px; border:1px solid #ccc; border-radius:6px; padding:7px 10px; margin-bottom:12px; font-size:.8rem; }
+  .inv-doc.screen-preview .inv-table{ width:100%; border-collapse:collapse; margin-bottom:12px; font-size:.78rem; }
+  .inv-doc.screen-preview .inv-table th, .inv-doc.screen-preview .inv-table td{ border:1px solid #999; padding:5px; text-align:center; }
+  .inv-doc.screen-preview .inv-table thead th{ background:#eee; }
+  .inv-doc.screen-preview .inv-totals{ width:75%; margin-right:auto; margin-left:0; border-collapse:collapse; font-size:.8rem; }
+  .inv-doc.screen-preview .inv-totals td{ padding:5px 8px; border-bottom:1px solid #ddd; }
+  .inv-doc.screen-preview .inv-totals td:last-child{ text-align:left; font-weight:600; }
+  .inv-doc.screen-preview .inv-final td{ border-top:2px solid #222; font-weight:800; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>حبوبات و خشکبار باقری</h1>
+  <p>دفتر حساب — فروش، مشتریان، انبار، تامین‌کننده‌ها</p>
+</header>
+
+<nav id="nav"></nav>
+<main id="main"></main>
+<button class="fab" id="fab" style="display:none;">+</button>
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* =======================================================================
+   حبوبات و خشکبار باقری — دفتر حساب
+   فایل تک‌صفحه‌ای، بدون سرور، بدون نیاز به اینترنت برای کارکرد اصلی.
+   (فونت وزیرمتن و کتابخانه‌های اکسل/تصویر فقط برای همان قابلیت‌های
+   اختیاری از CDN لود می‌شوند؛ اگر اینترنت نبود، بقیه‌ی برنامه عادی کار می‌کند.)
+   ======================================================================= */
+
+const DB_NAME = 'baqeriDB';
+const DB_VERSION = 1;
+const STORE = 'appdata';
+const RECORD_KEY = 'main';
+const PRERESTORE_KEY = 'preRestoreSnapshot';
+
+// schema versioning (data shape itself is unchanged/backward-compatible;
+// this is just a marker so future migrations can tell old saves apart)
+const CURRENT_SCHEMA_VERSION = 2;
+
+// simple rotating auto-backup, stored as extra rows in the same IndexedDB
+// object store — no new library, no new database
+const AUTO_BACKUP_PREFIX = 'autoBackup_';
+const AUTO_BACKUP_LIST_KEY = 'autoBackupList';
+const AUTO_BACKUP_MAX = 5;
+const AUTO_BACKUP_INTERVAL_MS = 12*60*60*1000; // حداکثر هر ۱۲ ساعت یک نسخه
+
+const ROUTES = ['شرق','مرکز','غرب'];
+const REGION_SUGGESTIONS = ['رویان','نوشهر','چالوس','سیسنگان','متل‌قو'];
+const CATEGORY_SUGGESTIONS = ['حبوبات','خشکبار','آجیل','برنج','ادویه','سایر'];
+const VISIT_RESULTS = ['سفارش گرفته شد','سفارش گرفته نشد','فروشگاه بسته بود','فقط بازدید/سرکشی'];
+
+let data = emptyData();
+let activeTab = 'dashboard';
+let dbInstance = null;
+let custFilter = 'all';
+let custSortByDebt = false;
+
+function emptyData(){
+  return { products: [], customers: [], invoices: [], payments: [], checks: [], suppliers: [], invoiceSeq: 1000, schemaVersion: CURRENT_SCHEMA_VERSION };
+}
+
+// ---------- small utilities ----------
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function faToEnDigits(str){
+  if(str===null || str===undefined) return '';
+  const map = {'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9',
+               '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+               '٫':'.','،':''};
+  return String(str).replace(/[۰-۹٠-٩٫،]/g, ch=>map[ch]!==undefined?map[ch]:ch);
+}
+function numVal(el){
+  if(!el) return 0;
+  return parseFloat(faToEnDigits(el.value))||0;
+}
+function esc(s){
+  return String(s===undefined||s===null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toman(n){ return (Math.round(n||0)).toLocaleString('fa-IR'); }
+function balanceStatusWord(balance){
+  if(balance>0) return 'بدهکار';
+  if(balance<0) return 'بستانکار';
+  return 'تسویه شده';
+}
+function balanceStatusText(balance, amountText){
+  return balance===0 ? balanceStatusWord(balance) : (balanceStatusWord(balance)+': '+amountText);
+}
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function nowHHMM(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function faDate(iso){
+  if(!iso) return '—';
+  try{ return new Date(iso).toLocaleDateString('fa-IR'); }catch(e){ return iso; }
+}
+function daysAgo(iso){
+  if(!iso) return Infinity;
+  const d = new Date(iso);
+  if(isNaN(d)) return Infinity;
+  return Math.floor((Date.now()-d.getTime())/86400000);
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ---------- IndexedDB layer ----------
+// Chosen over localStorage because: async (never blocks the UI thread on an
+// iPhone), much higher storage quota, and it survives Safari's storage
+// eviction rules better for a long-lived, years-of-invoices dataset.
+function openDB(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e)=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(STORE)){
+        db.createObjectStore(STORE, {keyPath:'key'});
+      }
+    };
+    req.onsuccess = (e)=> resolve(e.target.result);
+    req.onerror = (e)=> reject(e.target.error);
+  });
+}
+async function getDB(){
+  if(!dbInstance) dbInstance = await openDB();
+  return dbInstance;
+}
+async function dbGet(key){
+  const db = await getDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE,'readonly');
+    const req = tx.objectStore(STORE).get(key);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = (e)=>reject(e.target.error);
+  });
+}
+async function dbPut(key, value){
+  const db = await getDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put({key, value});
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = (e)=>reject(e.target.error);
+  });
+}
+async function dbDelete(key){
+  const db = await getDB();
+  return new Promise((resolve,reject)=>{
+    const tx = db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(key);
+    tx.oncomplete = ()=>resolve();
+    tx.onerror = (e)=>reject(e.target.error);
+  });
+}
+
+// normalize / migrate any older data shape into the current schema so old
+// backups (or the previous version of this app) keep working
+function normalizeData(parsed){
+  const d = emptyData();
+  if(!parsed || typeof parsed !== 'object') return d;
+  // نسخه‌ی ورودی را فقط برای لاگ/عیب‌یابی نگه می‌داریم؛ نبودش یعنی بکاپ قدیمی (نسخه ۱)
+  const inputSchemaVersion = parsed.schemaVersion || 1;
+  d.invoiceSeq = parsed.invoiceSeq || 1000;
+  d.products = (parsed.products||[]).map(p=>({
+    id: p.id||uid(),
+    name: p.name||'',
+    category: p.category||'',
+    packageWeight: p.packageWeight||0,
+    buy: p.buy||0,
+    wholesale: (p.wholesale!==undefined? p.wholesale : p.sell) || 0,
+    retail: (p.retail!==undefined? p.retail : p.sell) || 0,
+    sell: p.sell || p.retail || 0,
+    stockQty: p.stockQty!==undefined ? p.stockQty : 0,
+    minStock: p.minStock||0,
+    priceHistory: p.priceHistory||[],
+    stockLog: p.stockLog||[],
+  }));
+  d.customers = (parsed.customers||[]).map(c=>({
+    id: c.id||uid(),
+    name: c.name||'',
+    ownerName: c.ownerName||'',
+    phone: c.phone||'',
+    address: c.address||'',
+    region: c.region||'',
+    route: c.route||'',
+    note: c.note||'',
+    openingBalance: c.openingBalance||0,
+    visits: c.visits||[],
+  }));
+  d.invoices = (parsed.invoices||[]).map(i=>({
+    id:i.id||uid(), number:i.number, customerId:i.customerId, date:i.date,
+    items:(i.items||[]).map(it=>({
+      productId:it.productId, name:it.name, qty:it.qty, price:it.price,
+      buyPrice:it.buyPrice||0, discount:it.discount||0, weight:it.weight||0,
+    })),
+    total:i.total||0, discount:i.discount||0,
+    prevBalance:i.prevBalance, cashPaid:i.cashPaid||0, checkPaid:i.checkPaid||0,
+    cardPaid:i.cardPaid||0, transferPaid:i.transferPaid||0,
+    newBalance:i.newBalance,
+    editHistory:i.editHistory||[],
+  }));
+  d.payments = (parsed.payments||[]).map(p=>({
+    id:p.id||uid(), customerId:p.customerId, date:p.date, amount:p.amount,
+    method:p.method||'cash', invoiceId:p.invoiceId, note:p.note||'',
+    // برگشت‌های قدیمی این فیلد را ندارند => آرایه خالی => رفتار قبلی (فقط اصلاح حساب) دقیقاً حفظ می‌شود
+    returnItems: Array.isArray(p.returnItems) ? p.returnItems.map(ri=>({
+      productId: ri.productId, name: ri.name||'', qty: ri.qty||0, price: ri.price||0,
+    })) : [],
+  }));
+  d.checks = (parsed.checks||[]).map(c=>({
+    id:c.id||uid(), customerId:c.customerId, amount:c.amount, dueDate:c.dueDate,
+    checkNumber:c.checkNumber||'', status:c.status||'pending', invoiceId:c.invoiceId,
+  }));
+  d.suppliers = (parsed.suppliers||[]).map(s=>({
+    id:s.id||uid(), name:s.name||'', phone:s.phone||'',
+    openingBalance: s.openingBalance||0,
+    purchases:(s.purchases||[]).map(p=>({
+      id:p.id||uid(), date:p.date, amount:p.amount, desc:p.desc||'', productId:p.productId||'', qty:p.qty||0,
+      returns:(p.returns||[]).map(r=>({id:r.id||uid(), date:r.date||p.date, qty:r.qty||0, amount:r.amount||0})),
+    })),
+    payments:s.payments||[],
+  }));
+  // بعد از migration و آماده‌سازی کامل داده، همیشه نسخه‌ی فعلی schema خروجی گرفته می‌شود
+  d.schemaVersion = CURRENT_SCHEMA_VERSION;
+  if(inputSchemaVersion !== CURRENT_SCHEMA_VERSION){
+    console.log('normalizeData: migrated data from schemaVersion', inputSchemaVersion, 'to', CURRENT_SCHEMA_VERSION);
+  }
+  return d;
+}
+
+async function loadData(){
+  try{
+    const record = await dbGet(RECORD_KEY);
+    if(record && record.value){
+      data = normalizeData(JSON.parse(record.value));
+    } else if(window.storage){
+      // fallback: recover from an older window.storage-based save, if this
+      // file was ever previously run inside a Claude artifact sandbox
+      try{
+        const legacy = await window.storage.get('baqeri-erp-data', false);
+        if(legacy && legacy.value){
+          data = normalizeData(JSON.parse(legacy.value));
+          await saveData();
+        }
+      }catch(e){ /* no legacy data — fine */ }
+    }
+  }catch(e){
+    console.error('loadData failed', e);
+    showToast('خطا در بارگذاری اطلاعات');
+  }
+}
+
+async function saveData(){
+  try{
+    data.schemaVersion = CURRENT_SCHEMA_VERSION;
+    await dbPut(RECORD_KEY, JSON.stringify(data));
+  }catch(e){
+    console.error('save failed', e);
+    showToast('⚠️ ذخیره نشد، دوباره تلاش کن');
+    return;
+  }
+  // fire-and-forget: بکاپ خودکار کاملاً جدا از ذخیره‌ی اصلی اجرا می‌شود؛
+  // ذخیره‌ی اصلی چند خط بالاتر با موفقیت کامل شده، پس هر خطایی اینجا فقط لاگ می‌شود
+  autoBackupTick().catch(e=>console.error('auto backup failed', e));
+}
+
+function nextInvoiceNumber(){
+  data.invoiceSeq = (data.invoiceSeq||1000) + 1;
+  return data.invoiceSeq;
+}
+
+// ---------- backup / restore ----------
+async function downloadFile(filename, blobParts, mime){
+  const blob = (blobParts instanceof Blob) ? blobParts : new Blob([blobParts], {type:mime});
+  // iOS Safari often just previews a blob link instead of saving it — the
+  // share sheet's "Save to Files" is the reliable path on iPhone.
+  try{
+    if(navigator.canShare){
+      const file = new File([blob], filename, {type:mime});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:filename});
+        return;
+      }
+    }
+  }catch(e){
+    // user cancelled the share sheet, or share isn't available — fall back below
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+async function exportBackupJSON(){
+  const stamp = todayISO();
+  await downloadFile(`baqeri-backup-${stamp}.json`, JSON.stringify(data, null, 2), 'application/json');
+  showToast('فایل بکاپ آماده شد');
+}
+
+function validateBackupShape(parsed){
+  if(!parsed || typeof parsed !== 'object') return false;
+  const arrays = ['products','customers','invoices','payments','checks','suppliers'];
+  return arrays.every(k => parsed[k]===undefined || Array.isArray(parsed[k]));
+}
+
+async function importBackupJSON(file){
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    if(!validateBackupShape(parsed)){
+      showToast('این فایل، فایل بکاپ معتبری نیست');
+      return;
+    }
+    // safety net: keep a snapshot of what's about to be overwritten
+    await dbPut(PRERESTORE_KEY, JSON.stringify(data));
+    data = normalizeData(parsed);
+    await saveData();
+    render();
+    showToast('اطلاعات با موفقیت بازیابی شد');
+  }catch(e){
+    console.error(e);
+    showToast('فایل بکاپ معتبر نیست یا خراب است');
+  }
+}
+
+async function undoLastRestore(){
+  try{
+    const snap = await dbGet(PRERESTORE_KEY);
+    if(!snap || !snap.value){ showToast('نسخه‌ی قبل از بازیابی موجود نیست'); return; }
+    data = normalizeData(JSON.parse(snap.value));
+    await saveData();
+    render();
+    showToast('به حالت قبل از بازیابی برگشت');
+  }catch(e){
+    console.error(e);
+    showToast('بازگرداندن ممکن نشد');
+  }
+}
+
+// ---------- بکاپ خودکار ساده (fire-and-forget، هیچ‌وقت نباید جلوی ذخیره‌ی اصلی را بگیرد) ----------
+async function getAutoBackupList(){
+  const rec = await dbGet(AUTO_BACKUP_LIST_KEY);
+  return (rec && rec.value) ? JSON.parse(rec.value) : [];
+}
+
+async function autoBackupTick(){
+  const list = await getAutoBackupList();
+  const last = list.length ? list[list.length-1].ts : 0;
+  if(Date.now() - last < AUTO_BACKUP_INTERVAL_MS) return; // هنوز زوده، لازم نیست نسخه‌ی جدید بگیریم
+  const ts = Date.now();
+  const key = AUTO_BACKUP_PREFIX + ts;
+  await dbPut(key, JSON.stringify(data));
+  list.push({key, ts});
+  while(list.length > AUTO_BACKUP_MAX){
+    const old = list.shift();
+    try{ await dbDelete(old.key); }catch(e){ /* نبود یا حذف نشد، مهم نیست */ }
+  }
+  await dbPut(AUTO_BACKUP_LIST_KEY, JSON.stringify(list));
+}
+
+async function restoreFromAutoBackup(key){
+  if(!confirm('مطمئنی؟ اطلاعات فعلی با این نسخه‌ی بکاپ خودکار جایگزین می‌شه.')) return;
+  try{
+    const snap = await dbGet(key);
+    if(!snap || !snap.value){ showToast('این نسخه‌ی بکاپ پیدا نشد'); return; }
+    // مثل بازیابی از فایل: قبل از جایگزینی، وضعیت فعلی هم نگه داشته می‌شود
+    await dbPut(PRERESTORE_KEY, JSON.stringify(data));
+    data = normalizeData(JSON.parse(snap.value));
+    await saveData();
+    render();
+    showToast('از بکاپ خودکار بازیابی شد');
+  }catch(e){
+    console.error(e);
+    showToast('بازیابی از بکاپ خودکار ممکن نشد');
+  }
+}
+
+function exportExcel(){
+  if(typeof XLSX === 'undefined'){
+    showToast('کتابخانه اکسل لود نشد؛ برای این خروجی به اینترنت نیاز است');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+
+  const custRows = data.customers.map(c=>{
+    const t = customerTotals(c.id);
+    return {
+      'نام فروشگاه': c.name, 'صاحب فروشگاه': c.ownerName||'', 'شماره تماس': c.phone||'',
+      'منطقه': c.region||'', 'مسیر': c.route||'',
+      'جمع فاکتورها': t.invTotal, 'مانده حساب': t.balance,
+    };
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(custRows.length?custRows:[{'نام فروشگاه':''}]), 'مشتریان');
+
+  const invRows = [];
+  data.invoices.forEach(i=>{
+    const cust = data.customers.find(c=>c.id===i.customerId);
+    i.items.forEach(it=>{
+      invRows.push({
+        'شماره فاکتور': i.number||'', 'تاریخ': i.date, 'مشتری': cust?cust.name:'',
+        'کالا': it.name, 'تعداد': it.qty, 'قیمت واحد': it.price, 'جمع': it.qty*it.price - (it.discount||0),
+      });
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(invRows.length?invRows:[{'شماره فاکتور':''}]), 'فاکتورها');
+
+  const prodRows = data.products.map(p=>({
+    'نام کالا': p.name, 'دسته‌بندی': p.category||'', 'قیمت خرید': p.buy,
+    'قیمت عمده': p.wholesale, 'قیمت مصرف‌کننده': p.retail, 'موجودی': p.stockQty,
+    'ارزش ریالی موجودی': (p.stockQty||0)*(p.buy||0),
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(prodRows.length?prodRows:[{'نام کالا':''}]), 'کالاها');
+
+  const supRows = data.suppliers.map(s=>{
+    const t = supplierTotals(s.id);
+    return { 'تامین‌کننده': s.name, 'جمع خرید': t.purchaseTotal, 'جمع پرداخت': t.payTotal, 'بدهی': t.balance };
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(supRows.length?supRows:[{'تامین‌کننده':''}]), 'تامین‌کننده‌ها');
+
+  const wbArray = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+  const blob = new Blob([wbArray], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  downloadFile(`baqeri-report-${todayISO()}.xlsx`, blob).then(()=>{
+    showToast('فایل اکسل آماده شد');
+  });
+}
+
+// ---------- derived calculations ----------
+function customerInvoices(cid){ return data.invoices.filter(i=>i.customerId===cid); }
+function customerPayments(cid){ return data.payments.filter(p=>p.customerId===cid); }
+function customerChecks(cid){ return data.checks.filter(c=>c.customerId===cid); }
+
+// برای هشدار «برگشت بیشتر از فروش قبلی»: مجموع فروخته‌شده و مجموع قبلاً برگشت‌داده‌شده‌ی
+// یک کالای مشخص به یک مشتری مشخص
+function productSoldQtyToCustomer(cid, productId){
+  return customerInvoices(cid).reduce((s,inv)=>
+    s + inv.items.filter(it=>it.productId===productId).reduce((a,it)=>a+(it.qty||0),0), 0);
+}
+function productReturnedQtyByCustomer(cid, productId){
+  return customerPayments(cid).filter(p=>p.method==='return').reduce((s,p)=>
+    s + (p.returnItems||[]).filter(ri=>ri.productId===productId).reduce((a,ri)=>a+(ri.qty||0),0), 0);
+}
+function productReturnAvailableQty(cid, productId){
+  return Math.max(0, productSoldQtyToCustomer(cid, productId) - productReturnedQtyByCustomer(cid, productId));
+}
+
+function customerTotals(cid){
+  const invTotal = customerInvoices(cid).reduce((s,i)=>s+i.total,0);
+  const payTotal = customerPayments(cid).reduce((s,p)=>s+p.amount,0);
+  const checkTotal = customerChecks(cid).reduce((s,c)=>s+c.amount,0);
+  const cashOnlyTotal = customerPayments(cid).filter(p=>['cash','card','transfer'].includes(p.method)).reduce((s,p)=>s+p.amount,0);
+  const discountTotal = customerPayments(cid).filter(p=>p.method==='discount').reduce((s,p)=>s+p.amount,0);
+  const returnTotal = customerPayments(cid).filter(p=>p.method==='return').reduce((s,p)=>s+p.amount,0);
+  const c = data.customers.find(x=>x.id===cid);
+  const openingBalance = c ? (c.openingBalance||0) : 0;
+  const balance = openingBalance + invTotal - payTotal - checkTotal;
+  return { invTotal, payTotal, checkTotal, cashOnlyTotal, discountTotal, returnTotal, openingBalance, balance };
+}
+
+function customerProfit(cid){
+  return customerInvoices(cid).reduce((s,inv)=>{
+    return s + inv.items.reduce((a,it)=>a + (it.price - (it.buyPrice||0)) * it.qty - (it.discount||0), 0);
+  },0);
+}
+
+function customerStats(cid){
+  const invs = customerInvoices(cid);
+  const pays = customerPayments(cid);
+  const t = customerTotals(cid);
+  const sortedInvs = invs.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const lastInvoice = sortedInvs[sortedInvs.length-1];
+  const firstInvoice = sortedInvs[0];
+  const lastPayment = pays.slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  return {
+    count: invs.length,
+    avgInvoice: invs.length ? t.invTotal/invs.length : 0,
+    firstInvoiceDate: firstInvoice ? firstInvoice.date : null,
+    lastInvoiceDate: lastInvoice ? lastInvoice.date : null,
+    lastPaymentDate: lastPayment ? lastPayment.date : null,
+    profit: customerProfit(cid),
+    daysSinceLast: lastInvoice ? daysAgo(lastInvoice.date) : Infinity,
+  };
+}
+
+function customerStatus(cid){
+  const st = customerStats(cid);
+  if(st.count===0) return 'new';
+  if(st.daysSinceLast > 60) return 'lost';
+  if(st.daysSinceLast > 21) return 'inactive';
+  return 'active';
+}
+
+function supplierTotals(sid){
+  const s = data.suppliers.find(x=>x.id===sid);
+  if(!s) return {purchaseTotal:0, payTotal:0, returnTotal:0, balance:0};
+  const purchaseTotal = (s.purchases||[]).reduce((a,p)=>a+p.amount,0);
+  const returnTotal = (s.purchases||[]).reduce((a,p)=>a+(p.returns||[]).reduce((b,r)=>b+(r.amount||0),0),0);
+  const payTotal = (s.payments||[]).reduce((a,p)=>a+p.amount,0);
+  const openingBalance = s.openingBalance||0;
+  return { purchaseTotal, payTotal, returnTotal, openingBalance, balance: openingBalance + purchaseTotal - payTotal - returnTotal };
+}
+
+function inventoryValue(){
+  return data.products.reduce((s,p)=>s + (p.stockQty||0)*(p.buy||0), 0);
+}
+function lowStockProducts(){
+  return data.products.filter(p => (p.minStock||0) > 0 && (p.stockQty||0) <= p.minStock);
+}
+
+function isSameMonth(iso, ref){
+  const d = new Date(iso), r = ref;
+  return d.getFullYear()===r.getFullYear() && d.getMonth()===r.getMonth();
+}
+function isSameDay(iso, ref){
+  const d = new Date(iso);
+  return d.toDateString() === ref.toDateString();
+}
+
+function globalTotals(){
+  const totalSales = data.invoices.reduce((s,i)=>s+i.total,0);
+  const totalProfit = data.invoices.reduce((s,i)=>{
+    const itemsProfit = i.items.reduce((a,it)=>a + (it.price - (it.buyPrice||0)) * it.qty - (it.discount||0), 0);
+    return s + itemsProfit;
+  },0);
+  const totalReceived = data.payments.filter(p=>['cash','card','transfer'].includes(p.method)).reduce((s,p)=>s+p.amount,0);
+  const outstandingChecks = data.checks.filter(c=>c.status!=='cleared').reduce((s,c)=>s+c.amount,0);
+  const customerDebt = data.customers.reduce((s,c)=>{
+    const t = customerTotals(c.id);
+    return s + Math.max(t.balance,0);
+  },0);
+  const supplierDebt = data.suppliers.reduce((s,sp)=>s+supplierTotals(sp.id).balance,0);
+
+  const now = new Date();
+  const todaySales = data.invoices.filter(i=>isSameDay(i.date, now)).reduce((s,i)=>s+i.total,0);
+  const todayCount = data.invoices.filter(i=>isSameDay(i.date, now)).length;
+  const monthSales = data.invoices.filter(i=>isSameMonth(i.date, now)).reduce((s,i)=>s+i.total,0);
+  const monthCount = data.invoices.filter(i=>isSameMonth(i.date, now)).length;
+
+  return { totalSales, totalProfit, totalReceived, outstandingChecks, customerDebt, supplierDebt,
+    todaySales, todayCount, monthSales, monthCount };
+}
+
+function checksDueSoon(){
+  const now = new Date();
+  return data.checks.filter(c=>{
+    if(c.status==='cleared') return false;
+    const due = new Date(c.dueDate);
+    const diffDays = (due - now)/86400000;
+    return diffDays <= 3;
+  }).sort((a,b)=> new Date(a.dueDate)-new Date(b.dueDate));
+}
+
+function topProducts(limit){
+  const map = {};
+  data.invoices.forEach(inv=>inv.items.forEach(it=>{
+    if(!map[it.productId]) map[it.productId] = {name:it.name, qty:0, revenue:0};
+    map[it.productId].qty += it.qty;
+    map[it.productId].revenue += it.qty*it.price - (it.discount||0);
+  }));
+  return Object.values(map).sort((a,b)=>b.qty-a.qty).slice(0, limit||5);
+}
+function topCustomers(limit){
+  return data.customers.map(c=>({ c, t: customerTotals(c.id) }))
+    .sort((a,b)=>b.t.invTotal-a.t.invTotal)
+    .slice(0, limit||5)
+    .filter(x=>x.t.invTotal>0);
+}
+function debtorList(limit){
+  return data.customers.map(c=>({ c, t: customerTotals(c.id) }))
+    .filter(x=>x.t.balance>0)
+    .sort((a,b)=>b.t.balance-a.t.balance)
+    .slice(0, limit||10000);
+}
+function inactiveCustomers(){
+  return data.customers.filter(c=>{
+    const status = customerStatus(c.id);
+    return status==='inactive' || status==='lost';
+  }).map(c=>({c, st:customerStats(c.id)})).sort((a,b)=>b.st.daysSinceLast-a.st.daysSinceLast);
+}
+
+// ---------- render ----------
+const tabs = [
+  {id:'dashboard', label:'داشبورد'},
+  {id:'customers', label:'مشتریان'},
+  {id:'products', label:'اجناس و انبار'},
+  {id:'suppliers', label:'تامین‌کننده‌ها'},
+  {id:'reports', label:'گزارش‌ها'},
+  {id:'backup', label:'بکاپ'},
+];
+
+function renderNav(){
+  const nav = document.getElementById('nav');
+  nav.innerHTML = tabs.map(t=>`<button data-tab="${t.id}" class="${activeTab===t.id?'active':''}">${t.label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ activeTab=b.dataset.tab; render(); });
+  });
+}
+
+function render(){
+  renderNav();
+  const main = document.getElementById('main');
+  const fab = document.getElementById('fab');
+  fab.style.display='none'; fab.onclick=null;
+  if(activeTab==='dashboard'){ renderDashboard(main); }
+  if(activeTab==='products'){ renderProducts(main); fab.style.display='block'; fab.onclick=()=>openAddProduct(); }
+  if(activeTab==='customers'){ renderCustomers(main); fab.style.display='block'; fab.onclick=()=>openAddCustomer(); }
+  if(activeTab==='suppliers'){ renderSuppliers(main); fab.style.display='block'; fab.onclick=()=>openAddSupplier(); }
+  if(activeTab==='reports'){ renderReports(main); }
+  if(activeTab==='backup'){ renderBackup(main); }
+}
+
+function renderDashboard(main){
+  const g = globalTotals();
+  const due = checksDueSoon();
+  const lowStock = lowStockProducts();
+  main.innerHTML = `
+    <div class="cards">
+      <div class="card"><div class="label">فروش امروز</div><div class="value accent-olive">${toman(g.todaySales)} ت</div><div class="sub">${g.todayCount} فاکتور</div></div>
+      <div class="card"><div class="label">فروش این ماه</div><div class="value accent-olive">${toman(g.monthSales)} ت</div><div class="sub">${g.monthCount} فاکتور</div></div>
+      <div class="card"><div class="label">جمع سود کل</div><div class="value accent-olive">${toman(g.totalProfit)} ت</div></div>
+      <div class="card"><div class="label">جمع دریافتی (نقد/کارت/انتقال)</div><div class="value">${toman(g.totalReceived)} ت</div></div>
+      <div class="card"><div class="label">چک‌های در جریان</div><div class="value accent-amber">${toman(g.outstandingChecks)} ت</div></div>
+      <div class="card"><div class="label">بدهی مشتریان به شما</div><div class="value accent-rust">${toman(g.customerDebt)} ت</div></div>
+      <div class="card"><div class="label">بدهی شما به تامین‌کننده‌ها</div><div class="value accent-red">${toman(g.supplierDebt)} ت</div></div>
+      <div class="card"><div class="label">ارزش ریالی انبار</div><div class="value">${toman(inventoryValue())} ت</div></div>
+    </div>
+    <h2 class="section-title">چک‌های نزدیک سررسید</h2>
+    ${due.length===0 ? `<div class="empty">فعلاً چکی نزدیک سررسید نیست</div>` : due.map(c=>{
+      const cust = data.customers.find(x=>x.id===c.customerId);
+      const overdue = new Date(c.dueDate) < new Date();
+      return `<div class="ledger-row">
+        <span class="name" style="color:${overdue?'var(--red)':'var(--amber)'}">${esc(cust?cust.name:'—')}</span>
+        <span class="filler"></span>
+        <span class="amount">${toman(c.amount)} ت
+          <span class="sub">${overdue?'سررسید گذشته':'سررسید'}: ${faDate(c.dueDate)}</span>
+        </span>
+      </div>`;
+    }).join('')}
+    ${lowStock.length? `
+      <h2 class="section-title">کالاهای رو به اتمام</h2>
+      ${lowStock.map(p=>`
+        <div class="ledger-row"><span class="name">${esc(p.name)}</span><span class="filler"></span>
+        <span class="amount accent-red">${p.stockQty} باقیمانده <span class="sub">حداقل: ${p.minStock}</span></span></div>
+      `).join('')}
+    ` : ''}
+  `;
+}
+
+function renderProducts(main){
+  main.innerHTML = `
+    <div class="field"><input id="product-search" placeholder="جستجوی کالا یا دسته‌بندی..."></div>
+    <div id="product-table-wrap"></div>
+  `;
+  function draw(filterText){
+    const q = (filterText||'').trim().toLowerCase();
+    const list = data.products.filter(p=> !q || (p.name||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q));
+    const wrap = document.getElementById('product-table-wrap');
+    if(data.products.length===0){ wrap.innerHTML = `<div class="empty">هنوز جنسی ثبت نشده. با دکمه + یکی اضافه کن.</div>`; return; }
+    if(list.length===0){ wrap.innerHTML = `<div class="empty">چیزی پیدا نشد</div>`; return; }
+    wrap.innerHTML = list.map(p=>{
+      const low = (p.minStock||0)>0 && (p.stockQty||0)<=p.minStock;
+      return `<div class="ledger-row" data-edit-product="${p.id}">
+        <span class="name">${esc(p.name)}${p.category?` <span class="sub" style="display:inline;">(${esc(p.category)})</span>`:''}</span>
+        <span class="filler"></span>
+        <span class="amount">موجودی: ${p.stockQty||0} ${low?'<span class="badge low">کم</span>':''}
+          <span class="sub">خرید ${toman(p.buy)} / عمده ${toman(p.wholesale)} / مصرف‌کننده ${toman(p.retail)}</span>
+        </span>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('[data-edit-product]').forEach(b=>{
+      b.addEventListener('click', ()=>openAddProduct(b.dataset.editProduct));
+    });
+  }
+  draw('');
+  document.getElementById('product-search').addEventListener('input', e=>draw(e.target.value));
+}
+
+function renderCustomers(main){
+  main.innerHTML = `
+    <div class="field"><input id="customer-search" placeholder="جستجوی مشتری، منطقه یا مسیر..."></div>
+    <div class="chip-row">
+      <button class="chip ${custFilter==='all'?'active':''}" data-f="all">همه</button>
+      <button class="chip ${custFilter==='debtor'?'active':''}" data-f="debtor">بدحساب</button>
+      <button class="chip ${custFilter==='active'?'active':''}" data-f="active">فعال</button>
+      <button class="chip ${custFilter==='inactive'?'active':''}" data-f="inactive">بدون خرید اخیر</button>
+      <button class="chip ${custFilter==='lost'?'active':''}" data-f="lost">از دست رفته</button>
+    </div>
+    <div class="btn-row" style="margin-bottom:10px;margin-top:-4px;">
+      <button class="btn small secondary" id="sort-debt">${custSortByDebt?'✓ ':''}مرتب‌سازی بر اساس بدهی</button>
+    </div>
+    <div id="customer-list"></div>
+  `;
+  function draw(filterText){
+    const q = (filterText||'').trim().toLowerCase();
+    let list = data.customers.filter(c=>{
+      if(!q) return true;
+      return (c.name||'').toLowerCase().includes(q) || (c.region||'').toLowerCase().includes(q) || (c.route||'').toLowerCase().includes(q);
+    });
+    if(custFilter==='debtor') list = list.filter(c=>customerTotals(c.id).balance>0);
+    if(custFilter==='active') list = list.filter(c=>customerStatus(c.id)==='active');
+    if(custFilter==='inactive') list = list.filter(c=>customerStatus(c.id)==='inactive');
+    if(custFilter==='lost') list = list.filter(c=>customerStatus(c.id)==='lost');
+    if(custSortByDebt) list = list.slice().sort((a,b)=>customerTotals(b.id).balance-customerTotals(a.id).balance);
+
+    const wrap = document.getElementById('customer-list');
+    if(data.customers.length===0){ wrap.innerHTML = `<div class="empty">هنوز مشتری‌ای ثبت نشده. با دکمه + یکی اضافه کن.</div>`; return; }
+    if(list.length===0){ wrap.innerHTML = `<div class="empty">چیزی پیدا نشد</div>`; return; }
+    wrap.innerHTML = list.map(c=>{
+      const t = customerTotals(c.id);
+      const color = t.balance > 0 ? 'var(--rust)' : 'var(--olive-dark)';
+      const status = customerStatus(c.id);
+      const statusLabel = {new:'جدید', active:'فعال', inactive:'بدون خرید اخیر', lost:'از دست رفته'}[status];
+      return `<div class="ledger-row" data-open-customer="${c.id}">
+        <span class="name">${esc(c.name)}${c.region?` <span class="sub" style="display:inline;">(${esc(c.region)}${c.route?' — '+esc(c.route):''})</span>`:''}</span>
+        <span class="filler"></span>
+        <span class="amount" style="color:${color}">
+          ${balanceStatusText(t.balance, toman(Math.abs(t.balance))+' ت')}
+          <span class="sub">${statusLabel}${t.checkTotal>0?` — چک: ${toman(t.checkTotal)} ت`:''}</span>
+        </span>
+      </div>`;
+    }).join('');
+    wrap.querySelectorAll('[data-open-customer]').forEach(row=>{
+      row.addEventListener('click', ()=>openCustomerDetail(row.dataset.openCustomer));
+    });
+  }
+  draw('');
+  document.getElementById('customer-search').addEventListener('input', e=>draw(e.target.value));
+  main.querySelectorAll('.chip').forEach(ch=>{
+    ch.addEventListener('click', ()=>{ custFilter = ch.dataset.f; renderCustomers(main); });
+  });
+  document.getElementById('sort-debt').addEventListener('click', ()=>{
+    custSortByDebt = !custSortByDebt; renderCustomers(main);
+  });
+}
+
+function renderReports(main){
+  const g = globalTotals();
+  const tp = topProducts(5);
+  const tc = topCustomers(5);
+  const debtors = debtorList(10);
+  const inactives = inactiveCustomers();
+  const low = lowStockProducts();
+  main.innerHTML = `
+    <div class="cards">
+      <div class="card"><div class="label">فروش امروز</div><div class="value accent-olive">${toman(g.todaySales)} ت</div></div>
+      <div class="card"><div class="label">فروش این ماه</div><div class="value accent-olive">${toman(g.monthSales)} ت</div></div>
+      <div class="card"><div class="label">سود کل</div><div class="value accent-olive">${toman(g.totalProfit)} ت</div></div>
+      <div class="card"><div class="label">ارزش انبار</div><div class="value">${toman(inventoryValue())} ت</div></div>
+    </div>
+
+    <h2 class="section-title">پرفروش‌ترین کالاها</h2>
+    ${tp.length===0?`<div class="empty">هنوز فروشی ثبت نشده</div>`:tp.map(x=>`
+      <div class="ledger-row"><span class="name">${esc(x.name)}</span><span class="filler"></span>
+      <span class="amount">${x.qty} عدد <span class="sub">${toman(x.revenue)} ت</span></span></div>
+    `).join('')}
+
+    <h2 class="section-title">بهترین مشتریان</h2>
+    ${tc.length===0?`<div class="empty">هنوز فروشی ثبت نشده</div>`:tc.map(x=>`
+      <div class="ledger-row" data-open-customer="${x.c.id}"><span class="name">${esc(x.c.name)}</span><span class="filler"></span>
+      <span class="amount">${toman(x.t.invTotal)} ت</span></div>
+    `).join('')}
+
+    <h2 class="section-title">مشتریان بدهکار (به ترتیب بدهی)</h2>
+    ${debtors.length===0?`<div class="empty">بدهکاری ثبت نشده</div>`:debtors.map(x=>`
+      <div class="ledger-row" data-open-customer="${x.c.id}"><span class="name">${esc(x.c.name)}</span><span class="filler"></span>
+      <span class="amount accent-rust">${toman(x.t.balance)} ت</span></div>
+    `).join('')}
+
+    <h2 class="section-title">مشتریان بدون خرید اخیر / از دست رفته</h2>
+    ${inactives.length===0?`<div class="empty">همه‌ی مشتریان اخیراً خرید داشته‌اند</div>`:inactives.map(x=>`
+      <div class="ledger-row" data-open-customer="${x.c.id}"><span class="name">${esc(x.c.name)}</span><span class="filler"></span>
+      <span class="amount">${isFinite(x.st.daysSinceLast)? x.st.daysSinceLast+' روز پیش' : 'هرگز'}</span></div>
+    `).join('')}
+
+    <h2 class="section-title">کالاهای رو به اتمام</h2>
+    ${low.length===0?`<div class="empty">موجودی همه‌ی کالاها کافی است</div>`:low.map(p=>`
+      <div class="ledger-row"><span class="name">${esc(p.name)}</span><span class="filler"></span>
+      <span class="amount accent-red">${p.stockQty} از ${p.minStock}</span></div>
+    `).join('')}
+
+    <div class="btn-row"><button class="btn secondary" id="rep-excel">خروجی اکسل کامل</button></div>
+  `;
+  main.querySelectorAll('[data-open-customer]').forEach(row=>{
+    row.addEventListener('click', ()=>openCustomerDetail(row.dataset.openCustomer));
+  });
+  document.getElementById('rep-excel').addEventListener('click', exportExcel);
+}
+
+function renderBackup(main){
+  const stats = `${data.customers.length} مشتری، ${data.invoices.length} فاکتور، ${data.products.length} کالا، ${data.suppliers.length} تامین‌کننده`;
+  main.innerHTML = `
+    <h2 class="section-title">وضعیت فعلی</h2>
+    <div class="empty" style="padding:12px 0;">${stats}</div>
+
+    <h2 class="section-title">پشتیبان‌گیری</h2>
+    <div class="btn-row">
+      <button class="btn" id="export-json">دانلود بکاپ (JSON)</button>
+      <button class="btn secondary" id="export-excel">خروجی اکسل (گزارش)</button>
+    </div>
+
+    <h2 class="section-title">بازیابی از بکاپ</h2>
+    <div class="field">
+      <label>فایل بکاپ JSON رو انتخاب کن (از Files یا iCloud)</label>
+      <input type="file" id="import-file" accept="application/json">
+    </div>
+    <div class="confirm-box">
+      ⚠️ بازیابی، تمام اطلاعات فعلی رو با فایل بکاپ جایگزین می‌کنه. قبل از تایید یک نسخه از وضعیت فعلی به‌طور خودکار نگه‌داشته می‌شه و می‌تونی برش گردونی، ولی بهتره اگه چیز مهمی ثبت کردی، همین الان یک بکاپ دستی هم بگیری.
+    </div>
+    <div class="btn-row">
+      <button class="btn danger" id="do-import">بازیابی و جایگزینی اطلاعات فعلی</button>
+      <button class="btn secondary" id="undo-import">برگشت به قبل از آخرین بازیابی</button>
+    </div>
+
+    <h2 class="section-title">بکاپ‌های خودکار (داخل همین دستگاه)</h2>
+    <div class="empty" style="padding:0 0 8px;text-align:right;">هر حدود ۱۲ ساعت یک نسخه خودکار گرفته می‌شه و فقط ۵ نسخه‌ی آخر نگه داشته می‌شه. اینا جایگزین بکاپ دستی (بالا) نیستن، فقط یه شبکه‌ی ایمنی اضافه‌ن.</div>
+    <div id="auto-backup-list"><div class="empty">در حال بارگذاری…</div></div>
+  `;
+  document.getElementById('export-json').addEventListener('click', exportBackupJSON);
+  document.getElementById('export-excel').addEventListener('click', exportExcel);
+  document.getElementById('undo-import').addEventListener('click', undoLastRestore);
+  document.getElementById('do-import').addEventListener('click', ()=>{
+    const inp = document.getElementById('import-file');
+    if(!inp.files || !inp.files[0]){ showToast('اول یه فایل انتخاب کن'); return; }
+    if(!confirm('مطمئنی؟ اطلاعات فعلی با فایل بکاپ جایگزین می‌شه.')) return;
+    importBackupJSON(inp.files[0]);
+  });
+
+  getAutoBackupList().then(list=>{
+    const wrap = document.getElementById('auto-backup-list');
+    if(!wrap) return; // کاربر قبل از رسیدن جواب، تب رو عوض کرده
+    if(!list.length){ wrap.innerHTML = `<div class="empty">هنوز نسخه‌ی خودکاری گرفته نشده</div>`; return; }
+    wrap.innerHTML = list.slice().reverse().map(item=>`
+      <div class="ledger-row" data-restore-auto="${item.key}">
+        <span class="name">${new Date(item.ts).toLocaleString('fa-IR')}</span>
+        <span class="filler"></span>
+        <span class="amount"><button class="btn small secondary" data-restore-auto-btn="${item.key}">بازیابی</button></span>
+      </div>
+    `).join('');
+    wrap.querySelectorAll('[data-restore-auto-btn]').forEach(btn=>{
+      btn.addEventListener('click', ()=>restoreFromAutoBackup(btn.dataset.restoreAutoBtn));
+    });
+  }).catch(e=>{
+    console.error('loading auto backup list failed', e);
+    const wrap = document.getElementById('auto-backup-list');
+    if(wrap) wrap.innerHTML = `<div class="empty">لیست بکاپ خودکار در دسترس نیست</div>`;
+  });
+}
+
+function renderSuppliers(main){
+  if(data.suppliers.length===0){
+    main.innerHTML = `<div class="empty">هنوز تامین‌کننده‌ای ثبت نشده. با دکمه + یکی اضافه کن.</div>`;
+    return;
+  }
+  main.innerHTML = data.suppliers.map(s=>{
+    const t = supplierTotals(s.id);
+    return `<div class="ledger-row" data-open-supplier="${s.id}">
+      <span class="name">${esc(s.name)}</span>
+      <span class="filler"></span>
+      <span class="amount" style="color:${t.balance>0?'var(--red)':'var(--olive-dark)'}">
+        ${t.balance>0?'بدهکارید ':'تسویه '}${toman(Math.abs(t.balance))} ت
+      </span>
+    </div>`;
+  }).join('');
+  main.querySelectorAll('[data-open-supplier]').forEach(row=>{
+    row.addEventListener('click', ()=>openSupplierDetail(row.dataset.openSupplier));
+  });
+}
+
+// ---------- print & image export ----------
+function invoiceDocHtml(inv, cust, forPrint){
+  const itemRows = inv.items.map((it,idx)=>`
+    <tr>
+      <td>${idx+1}</td>
+      <td style="text-align:right;">${esc(it.name)}</td>
+      <td>${it.qty}</td>
+      <td>${toman(it.price)}</td>
+      <td>${it.discount?toman(it.discount):'—'}</td>
+      <td>${toman(it.qty*it.price-(it.discount||0))}</td>
+    </tr>
+  `).join('');
+  const subtotal = inv.items.reduce((s,it)=>s+it.qty*it.price-(it.discount||0),0);
+  const discount = inv.discount||0;
+  return `
+    <div class="inv-doc ${forPrint?'':'screen-preview'}">
+      <div class="inv-head">
+        <div class="inv-logo">لوگو</div>
+        <div class="inv-brand">
+          <div class="inv-brand-name">حبوبات و خشکبار باقری</div>
+          <div class="inv-doc-title">فاکتور فروش</div>
+        </div>
+        <div class="inv-meta">
+          <div>شماره: <b>${inv.number||'—'}</b></div>
+          <div>تاریخ: <b>${faDate(inv.date)}</b></div>
+        </div>
+      </div>
+      <div class="inv-customer">
+        <div>مشتری: <b>${esc(cust?cust.name:'—')}</b></div>
+        ${cust&&cust.phone?`<div>تماس: ${esc(cust.phone)}</div>`:''}
+        ${cust&&cust.address?`<div>آدرس: ${esc(cust.address)}</div>`:''}
+      </div>
+      <table class="inv-table">
+        <thead><tr><th>ردیف</th><th>شرح کالا</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف</th><th>مبلغ</th></tr></thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <table class="inv-totals">
+        <tr><td>جمع جزء</td><td>${toman(subtotal)} تومان</td></tr>
+        ${discount>0?`<tr><td>تخفیف کلی فاکتور</td><td>${toman(discount)} تومان</td></tr>`:''}
+        <tr class="inv-final"><td>جمع نهایی قابل پرداخت</td><td>${toman(inv.total)} تومان</td></tr>
+        ${typeof inv.prevBalance==='number'?`
+        <tr><td>مانده حساب قبل از این فاکتور</td><td>${toman(Math.abs(inv.prevBalance))} تومان (${balanceStatusWord(inv.prevBalance)})</td></tr>
+        <tr class="inv-final"><td>مانده حساب بعد از این فاکتور</td><td>${toman(Math.abs(inv.newBalance))} تومان (${balanceStatusWord(inv.newBalance)})</td></tr>
+        `:''}
+      </table>
+      ${forPrint?`
+      <div class="inv-signatures">
+        <div>امضای فروشنده<div class="inv-sig-line"></div></div>
+        <div>امضای خریدار<div class="inv-sig-line"></div></div>
+      </div>`:''}
+    </div>
+  `;
+}
+
+function printInvoice(invId){
+  const inv = data.invoices.find(x=>x.id===invId);
+  if(!inv) return;
+  const cust = data.customers.find(x=>x.id===inv.customerId);
+  document.getElementById('printArea').innerHTML = invoiceDocHtml(inv, cust, true);
+  window.print();
+}
+
+function statementDocHtml(c, forPrint){
+  const invs = customerInvoices(c.id).map(i=>({date:i.date, type:'فاکتور #'+(i.number||'—'), amount:i.total, kind:'debit'}));
+  const pays = customerPayments(c.id).map(p=>({date:p.date, type:paymentMethodLabel(p.method), amount:p.amount, kind:'credit'}));
+  const checks = customerChecks(c.id).map(ch=>({date:ch.dueDate, type:'دریافت چک'+(ch.status==='cleared'?' (وصول شده)':' (در جریان)'), amount:ch.amount, kind:'credit'}));
+  const opening = (c.openingBalance||0) !== 0 ? [{date:'0000-01-01', type:'مانده حساب اولیه', amount:Math.abs(c.openingBalance), kind: c.openingBalance>0?'debit':'credit'}] : [];
+  const ledger = [...opening, ...invs, ...pays, ...checks].sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  let running = 0;
+  const rowsHtml = ledger.map(l=>{
+    running += (l.kind==='debit' ? l.amount : -l.amount);
+    return `
+      <tr>
+        <td>${l.date==='0000-01-01' ? 'ابتدا' : faDate(l.date)}</td>
+        <td style="text-align:right;">${esc(l.type)}</td>
+        <td>${l.kind==='debit' ? toman(l.amount) : ''}</td>
+        <td>${l.kind==='credit' ? toman(l.amount) : ''}</td>
+        <td>${toman(running)}</td>
+      </tr>
+    `;
+  }).join('');
+  const finalBalance = running;
+  return `
+    <div class="inv-doc ${forPrint?'':'screen-preview'}">
+      <div class="inv-head">
+        <div class="inv-logo">لوگو</div>
+        <div class="inv-brand">
+          <div class="inv-brand-name">حبوبات و خشکبار باقری</div>
+          <div class="inv-doc-title">صورتحساب مشتری</div>
+        </div>
+        <div class="inv-meta"><div>تاریخ صدور: <b>${faDate(todayISO())}</b></div></div>
+      </div>
+      <div class="inv-customer">
+        <div>مشتری: <b>${esc(c.name)}</b></div>
+        ${c.phone?`<div>تماس: ${esc(c.phone)}</div>`:''}
+        ${c.address?`<div>آدرس: ${esc(c.address)}</div>`:''}
+      </div>
+      <table class="inv-table">
+        <thead><tr><th>تاریخ</th><th>شرح</th><th>بدهکار</th><th>بستانکار</th><th>مانده</th></tr></thead>
+        <tbody>${rowsHtml || `<tr><td colspan="5" style="text-align:center;">تراکنشی ثبت نشده</td></tr>`}</tbody>
+      </table>
+      <table class="inv-totals">
+        <tr class="inv-final"><td>مانده نهایی (${balanceStatusWord(finalBalance)})</td><td>${toman(Math.abs(finalBalance))} تومان</td></tr>
+      </table>
+      ${forPrint?`
+      <div class="inv-signatures">
+        <div>امضای فروشنده<div class="inv-sig-line"></div></div>
+        <div>امضای خریدار<div class="inv-sig-line"></div></div>
+      </div>`:''}
+    </div>
+  `;
+}
+
+function printCustomerStatement(cid){
+  const c = data.customers.find(x=>x.id===cid);
+  if(!c) return;
+  document.getElementById('printArea').innerHTML = statementDocHtml(c, true);
+  window.print();
+}
+
+async function exportInvoiceImage(invId){
+  const inv = data.invoices.find(x=>x.id===invId);
+  if(!inv) return;
+  if(typeof html2canvas === 'undefined'){
+    showToast('برای خروجی تصویر به اینترنت نیاز است (یک‌بار برای بارگذاری کتابخانه)');
+    return;
+  }
+  const cust = data.customers.find(x=>x.id===inv.customerId);
+  const holder = document.createElement('div');
+  holder.style.position='fixed'; holder.style.left='-9999px'; holder.style.top='0';
+  holder.style.width='420px';
+  holder.innerHTML = invoiceDocHtml(inv, cust, false);
+  document.body.appendChild(holder);
+  try{
+    const canvas = await html2canvas(holder, {scale:2, backgroundColor:'#ffffff'});
+    canvas.toBlob(async (blob)=>{
+      await downloadFile(`فاکتور-${inv.number||''}.png`, blob, 'image/png');
+      showToast('تصویر فاکتور آماده شد — می‌تونی از واتساپ بفرستی');
+    }, 'image/png');
+  }catch(e){
+    console.error(e);
+    showToast('ساخت تصویر ممکن نشد');
+  }finally{
+    holder.remove();
+  }
+}
+
+// ---------- modals ----------
+function closeModal(){
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = '';
+}
+
+function openSheet(html){
+  const root = document.getElementById('modalRoot');
+  // مطمئن شو هر Modal قبلی کاملاً پاک شده (نه فقط مخفی) قبل از ساختن Modal جدید،
+  // و یک reflow اجباری بین پاک‌شدن و رندر جدید انجام بده تا ظاهر (گوشه‌های گرد و غیره) بعد از باز/بسته‌شدن‌های مکرر خراب نشه
+  closeModal();
+  void root.offsetHeight;
+  root.innerHTML = `
+    <div class="overlay" id="overlay">
+      <div class="sheet" style="position:relative;">
+        <button class="close-x" id="closeX">×</button>
+        ${html}
+      </div>
+    </div>`;
+  document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeModal(); });
+  document.getElementById('closeX').addEventListener('click', closeModal);
+}
+
+// ---------- products / inventory ----------
+function openAddProduct(editId){
+  const p = editId ? data.products.find(x=>x.id===editId) : null;
+  const history = (p && p.priceHistory) ? [...p.priceHistory].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6) : [];
+  const stockLog = (p && p.stockLog) ? [...p.stockLog].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8) : [];
+  const profitPct = p && p.buy ? Math.round(((p.retail-p.buy)/p.buy)*100) : null;
+  openSheet(`
+    <h3>${p?'ویرایش جنس':'جنس جدید'}</h3>
+    <div class="field"><label>نام جنس</label><input id="f-name" value="${p?esc(p.name):''}"></div>
+    <div class="field">
+      <label>دسته‌بندی</label>
+      <input id="f-cat" list="cat-list" value="${p?esc(p.category||''):''}">
+      <datalist id="cat-list">${CATEGORY_SUGGESTIONS.map(c=>`<option value="${c}">`).join('')}</datalist>
+    </div>
+    <div class="field"><label>وزن بسته (کیلوگرم یا گرم، اختیاری)</label><input id="f-pkgw" type="text" inputmode="decimal" value="${p&&p.packageWeight?p.packageWeight:''}"></div>
+
+    <div class="field"><label>تاریخ این تغییر قیمت</label><input id="f-pdate" type="date" value="${todayISO()}"></div>
+    <div class="field" style="display:flex;gap:8px;">
+      <div style="flex:1;"><label>قیمت خرید</label><input id="f-buy" type="text" inputmode="decimal" value="${p?p.buy:''}"></div>
+      <div style="flex:1;"><label>قیمت عمده</label><input id="f-wholesale" type="text" inputmode="decimal" value="${p?p.wholesale:''}"></div>
+      <div style="flex:1;"><label>قیمت مصرف‌کننده</label><input id="f-retail" type="text" inputmode="decimal" value="${p?p.retail:''}"></div>
+    </div>
+    ${profitPct!==null?`<div class="empty" style="padding:0 0 8px;text-align:right;font-size:.8rem;">درصد سود تقریبی (نسبت به قیمت مصرف‌کننده): ${profitPct}٪</div>`:''}
+
+    <h2 class="section-title">موجودی انبار</h2>
+    <div class="field" style="display:flex;gap:8px;">
+      <div style="flex:1;"><label>موجودی فعلی</label><input id="f-stock" type="text" inputmode="decimal" value="${p?p.stockQty||0:0}"></div>
+      <div style="flex:1;"><label>حداقل موجودی هشدار</label><input id="f-minstock" type="text" inputmode="decimal" value="${p?p.minStock||0:0}"></div>
+    </div>
+    ${p?`
+    <div class="field" style="display:flex;gap:8px;align-items:end;">
+      <div style="flex:1;"><label>تغییر سریع موجودی</label><input id="f-adjust-qty" type="text" inputmode="decimal" placeholder="مثلاً ۱۰"></div>
+      <button class="btn small" id="stock-in">+ ورود</button>
+      <button class="btn small secondary" id="stock-out">- خروج/اصلاح</button>
+    </div>
+    `:''}
+
+    <div class="btn-row">
+      <button class="btn" id="save-product">ذخیره</button>
+      ${p?`<button class="btn danger" id="del-product">حذف</button>`:''}
+    </div>
+    ${history.length?`
+      <h2 class="section-title">تاریخچه قیمت</h2>
+      ${history.map(h=>`
+        <div class="ledger-row">
+          <span class="name">${faDate(h.date)}</span>
+          <span class="filler"></span>
+          <span class="amount">خرید ${toman(h.buy)} / عمده ${toman(h.wholesale!==undefined?h.wholesale:h.sell)} / مصرف‌کننده ${toman(h.retail!==undefined?h.retail:h.sell)}</span>
+        </div>
+      `).join('')}
+    `:''}
+    ${stockLog.length?`
+      <h2 class="section-title">تاریخچه موجودی</h2>
+      ${stockLog.map(l=>`
+        <div class="ledger-row">
+          <span class="name">${faDate(l.date)} <span class="sub">${l.note?esc(l.note):''}</span></span>
+          <span class="filler"></span>
+          <span class="amount" style="color:${l.qty>=0?'var(--olive-dark)':'var(--rust)'}">${l.qty>=0?'+':''}${l.qty}</span>
+        </div>
+      `).join('')}
+    `:''}
+  `);
+
+  async function persist(){
+    const name = document.getElementById('f-name').value.trim();
+    const category = document.getElementById('f-cat').value.trim();
+    const packageWeight = numVal(document.getElementById('f-pkgw'));
+    const buy = numVal(document.getElementById('f-buy'));
+    const wholesale = numVal(document.getElementById('f-wholesale'));
+    const retail = numVal(document.getElementById('f-retail'));
+    const pdate = document.getElementById('f-pdate').value || todayISO();
+    const stockQty = numVal(document.getElementById('f-stock'));
+    const minStock = numVal(document.getElementById('f-minstock'));
+    if(!name){ showToast('نام جنس رو وارد کن'); return null; }
+    if(p){
+      p.name=name; p.category=category; p.packageWeight=packageWeight;
+      p.buy=buy; p.wholesale=wholesale; p.retail=retail; p.sell=retail;
+      p.minStock=minStock;
+      p.priceHistory = p.priceHistory||[];
+      p.priceHistory.push({date:pdate, buy, wholesale, retail});
+      if(stockQty !== p.stockQty){
+        p.stockLog = p.stockLog||[];
+        p.stockLog.push({id:uid(), date:todayISO(), type:'adjust', qty:stockQty-(p.stockQty||0), note:'ویرایش دستی موجودی'});
+        p.stockQty = stockQty;
+      }
+      await saveData();
+      return p;
+    } else {
+      const np = {id:uid(), name, category, packageWeight, buy, wholesale, retail, sell:retail,
+        stockQty, minStock, priceHistory:[{date:pdate, buy, wholesale, retail}], stockLog: stockQty?[{id:uid(),date:todayISO(),type:'in',qty:stockQty,note:'موجودی اولیه'}]:[]};
+      data.products.push(np);
+      await saveData();
+      return np;
+    }
+  }
+
+  document.getElementById('save-product').addEventListener('click', async ()=>{
+    const saved = await persist();
+    if(!saved) return;
+    closeModal(); render(); showToast('ذخیره شد');
+  });
+  if(p){
+    document.getElementById('del-product').addEventListener('click', async ()=>{
+      if(!confirm(`جنس «${p.name}» حذف بشه؟`)) return;
+      data.products = data.products.filter(x=>x.id!==p.id);
+      await saveData(); closeModal(); render(); showToast('حذف شد');
+    });
+    document.getElementById('stock-in').addEventListener('click', async ()=>{
+      const q = numVal(document.getElementById('f-adjust-qty'));
+      if(q<=0){ showToast('مقدار رو وارد کن'); return; }
+      p.stockQty = (p.stockQty||0) + q;
+      p.stockLog = p.stockLog||[];
+      p.stockLog.push({id:uid(), date:todayISO(), type:'in', qty:q, note:'ورود کالا'});
+      await saveData(); openAddProduct(p.id); showToast('موجودی اضافه شد');
+    });
+    document.getElementById('stock-out').addEventListener('click', async ()=>{
+      const q = numVal(document.getElementById('f-adjust-qty'));
+      if(q<=0){ showToast('مقدار رو وارد کن'); return; }
+      if(q > (p.stockQty||0)){
+        if(!confirm('موجودی فعلی «'+p.name+'» فقط '+(p.stockQty||0)+' عدد است.\n\nبا این خروج، موجودی منفی می‌شود. مطمئنی می‌خوای ادامه بدی؟')) return;
+      }
+      p.stockQty = (p.stockQty||0) - q;
+      p.stockLog = p.stockLog||[];
+      p.stockLog.push({id:uid(), date:todayISO(), type:'out', qty:-q, note:'خروج/اصلاح دستی'});
+      await saveData(); openAddProduct(p.id); showToast('موجودی کم شد');
+    });
+  }
+}
+
+// ---------- customers ----------
+function openAddCustomer(editId){
+  const c = editId ? data.customers.find(x=>x.id===editId) : null;
+  openSheet(`
+    <h3>${c?'ویرایش مشتری':'مشتری جدید'}</h3>
+    <div class="field"><label>نام فروشگاه</label><input id="f-name" value="${c?esc(c.name):''}"></div>
+    <div class="field"><label>نام صاحب فروشگاه (اختیاری)</label><input id="f-owner" value="${c?esc(c.ownerName||''):''}"></div>
+    <div class="field"><label>شماره تماس (اختیاری)</label><input id="f-phone" value="${c?esc(c.phone||''):''}"></div>
+    <div class="field">
+      <label>منطقه</label>
+      <input id="f-region" list="region-list" value="${c?esc(c.region||''):''}">
+      <datalist id="region-list">${REGION_SUGGESTIONS.map(r=>`<option value="${r}">`).join('')}</datalist>
+    </div>
+    <div class="field">
+      <label>مسیر پخش</label>
+      <select id="f-route">
+        <option value="">— انتخاب نشده —</option>
+        ${ROUTES.map(r=>`<option value="${r}" ${c&&c.route===r?'selected':''}>${r}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>آدرس (اختیاری)</label><input id="f-address" value="${c?esc(c.address||''):''}"></div>
+    <div class="field"><label>یادداشت (اختیاری)</label><textarea id="f-note">${c?esc(c.note||''):''}</textarea></div>
+    <div class="field">
+      <label>مانده حساب اولیه (تومان)${c?' — برای اصلاح مانده بعد از شروع کار با برنامه':''}</label>
+      <input id="f-opening" type="text" inputmode="decimal" value="${c&&c.openingBalance?c.openingBalance:''}">
+      <div class="empty" style="padding:4px 0 0;text-align:right;font-size:.75rem;">بدهی مشتری از قبل از استفاده از این برنامه رو اینجا بزن. اگه خودت بهش بدهکاری (طلبکاره)، عدد رو منفی بزن. این مبلغ توی گزارش فروش/سود حساب نمی‌شه، فقط توی مانده حساب میاد.</div>
+    </div>
+    <div class="btn-row"><button class="btn" id="save-customer">ذخیره</button></div>
+  `);
+  document.getElementById('save-customer').addEventListener('click', async ()=>{
+    const name = document.getElementById('f-name').value.trim();
+    if(!name){ showToast('نام مشتری رو وارد کن'); return; }
+    const ownerName = document.getElementById('f-owner').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const region = document.getElementById('f-region').value.trim();
+    const route = document.getElementById('f-route').value;
+    const address = document.getElementById('f-address').value.trim();
+    const note = document.getElementById('f-note').value.trim();
+    const openingBalance = numVal(document.getElementById('f-opening'));
+    if(c){ c.ownerName=ownerName; c.name=name; c.phone=phone; c.region=region; c.route=route; c.address=address; c.note=note; c.openingBalance=openingBalance; }
+    else{ data.customers.push({id:uid(), name, ownerName, phone, region, route, address, note, openingBalance, visits:[]}); }
+    await saveData(); closeModal(); render();
+    if(c) openCustomerDetail(c.id);
+    showToast('ذخیره شد');
+  });
+}
+
+function paymentMethodLabel(method){
+  return {cash:'دریافت نقد', card:'دریافت با کارت', transfer:'انتقال بانکی', discount:'تخفیف', return:'برگشت از فروش'}[method] || 'دریافت';
+}
+
+function openAddTransaction(cid){
+  // وضعیت فرم بین رندرهای مجدد شیت نگه داشته می‌شود (همون الگوی openInvoiceForm)
+  let method = 'cash';
+  let amountStr = '';
+  let dateStr = todayISO();
+  let noteStr = '';
+  // ردیف‌های کالای برگشتی؛ فقط وقتی نوع تراکنش «برگشت از فروش» است استفاده می‌شود و کاملاً اختیاری است
+  let returnRows = [];
+
+  function returnItemsSectionHtml(){
+    if(method !== 'return') return '';
+    if(data.products.length===0){
+      return `<div class="empty" style="padding:8px 0;">جنسی ثبت نشده. اگه این برگشت مربوط به کالای مشخصی نیست، فقط دکمه‌ی «ثبت» رو بزن؛ فقط حساب مشتری اصلاح می‌شه.</div>`;
+    }
+    return `
+      <h2 class="section-title">کالای برگشتی (اختیاری)</h2>
+      <div class="empty" style="padding:0 0 8px;text-align:right;">اگه این برگشت واقعاً کالا داره، اینجا اضافه کن تا موجودی انبار هم خودکار زیاد بشه. اگه فقط اصلاح حساب مد نظرته، این بخش رو خالی بذار.</div>
+      <div id="return-items-wrap">${returnRows.map((r,idx)=>{
+        const available = productReturnAvailableQty(cid, r.productId);
+        const over = r.qty > available;
+        return `
+        <div class="field" style="display:flex;gap:6px;align-items:end;">
+          <div style="flex:2;">
+            <label>جنس</label>
+            <select data-ridx="${idx}" class="ret-product">
+              ${data.products.map(p=>`<option value="${p.id}" ${p.id===r.productId?'selected':''}>${esc(p.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>تعداد</label>
+            <input type="text" inputmode="decimal" data-ridx="${idx}" class="ret-qty" value="${r.qty||''}">
+          </div>
+          <div style="flex:1;">
+            <label>قیمت واحد (اختیاری)</label>
+            <input type="text" inputmode="decimal" data-ridx="${idx}" class="ret-price" value="${r.price||''}">
+          </div>
+          <button class="btn small danger" data-ridx="${idx}" id="ret-del-${idx}" style="flex:0;">حذف</button>
+        </div>
+        <div class="sub" style="margin:-6px 0 10px;${over?'color:var(--rust);':''}">
+          قابل برگشت طبق فروش‌های قبلی به این مشتری: ${available} عدد${over?' — ⚠️ تعداد وارد شده بیشتر از این مقدار است':''}
+        </div>`;
+      }).join('')}</div>
+      <button class="btn secondary small" id="add-return-row">+ افزودن کالای برگشتی</button>
+    `;
+  }
+
+  function renderSheet(){
+    openSheet(`
+      <h3>ثبت تراکنش جدید</h3>
+      <div class="field">
+        <label>نوع تراکنش</label>
+        <select id="f-method">
+          <option value="cash" ${method==='cash'?'selected':''}>دریافت نقدی</option>
+          <option value="card" ${method==='card'?'selected':''}>دریافت با کارت</option>
+          <option value="transfer" ${method==='transfer'?'selected':''}>انتقال بانکی</option>
+          <option value="discount" ${method==='discount'?'selected':''}>تخفیف (کاهش بدهی)</option>
+          <option value="return" ${method==='return'?'selected':''}>برگشت از فروش</option>
+        </select>
+      </div>
+      <div class="field"><label>تاریخ</label><input id="f-date" type="date" value="${dateStr}"></div>
+      <div class="field"><label>مبلغ (تومان)</label><input id="f-amount" type="text" inputmode="decimal" value="${amountStr}"></div>
+      <div class="field"><label>توضیح (اختیاری)</label><input id="f-note" value="${esc(noteStr)}"></div>
+      ${returnItemsSectionHtml()}
+      <div class="btn-row"><button class="btn" id="save-tx">ثبت</button></div>
+    `);
+
+    document.getElementById('f-method').addEventListener('change', e=>{
+      method = e.target.value;
+      if(method==='return' && data.products.length && returnRows.length===0){
+        // یک ردیف خالی برای راحتی، ولی کاملاً اختیاری و قابل حذف
+      }
+      renderSheet();
+    });
+    document.getElementById('f-date').addEventListener('input', e=>{ dateStr = e.target.value; });
+    document.getElementById('f-amount').addEventListener('input', e=>{ amountStr = e.target.value; });
+    document.getElementById('f-note').addEventListener('input', e=>{ noteStr = e.target.value; });
+
+    const addBtn = document.getElementById('add-return-row');
+    if(addBtn){
+      addBtn.addEventListener('click', ()=>{
+        const dp = data.products[0];
+        returnRows.push({productId:dp.id, qty:1, price:dp.retail||dp.sell||0});
+        renderSheet();
+      });
+    }
+    document.querySelectorAll('.ret-product').forEach(el=>el.addEventListener('change', e=>{
+      returnRows[e.target.dataset.ridx].productId = e.target.value;
+      renderSheet();
+    }));
+    document.querySelectorAll('.ret-qty').forEach(el=>el.addEventListener('input', e=>{
+      returnRows[e.target.dataset.ridx].qty = parseFloat(faToEnDigits(e.target.value))||0;
+    }));
+    document.querySelectorAll('.ret-price').forEach(el=>el.addEventListener('input', e=>{
+      returnRows[e.target.dataset.ridx].price = parseFloat(faToEnDigits(e.target.value))||0;
+    }));
+    document.querySelectorAll('[id^="ret-del-"]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        returnRows.splice(parseInt(btn.dataset.ridx,10), 1);
+        renderSheet();
+      });
+    });
+
+    document.getElementById('save-tx').addEventListener('click', async ()=>{
+      const amount = parseFloat(faToEnDigits(amountStr))||0;
+      const date = dateStr || todayISO();
+      const note = (noteStr||'').trim();
+      if(amount<=0){ showToast('مبلغ رو وارد کن'); return; }
+
+      let returnItems = [];
+      if(method==='return'){
+        returnItems = returnRows
+          .filter(r=>r.productId && r.qty>0)
+          .map(r=>{
+            const prod = data.products.find(p=>p.id===r.productId);
+            return {productId:r.productId, name:prod?prod.name:'', qty:r.qty, price:r.price||0};
+          });
+        // هماهنگی مبلغ برگشت با «مقدار × قیمت واحد» کالاهای برگشتی (فقط وقتی قیمت واحدی وارد شده باشد)
+        const expectedReturnAmount = returnItems.reduce((s,ri)=>s+(ri.qty*(ri.price||0)),0);
+        if(expectedReturnAmount>0 && Math.abs(expectedReturnAmount-amount)>1){
+          const proceedAmount = confirm('⚠️ مبلغ واردشده با «مقدار × قیمت واحد» کالاهای برگشتی هم‌خوانی ندارد.\n\nمبلغ واردشده: '+toman(amount)+' تومان\nمبلغ منطقی طبق کالاها: '+toman(expectedReturnAmount)+' تومان\n\nمطمئنی می‌خوای همینطور ثبت کنی؟');
+          if(!proceedAmount) return;
+        }
+        // بررسی برگشت بیشتر از فروش قبلی؛ فقط هشدار می‌دهیم، جلوی ثبت را کاملاً نمی‌بندیم
+        const overItems = returnItems.filter(ri=>ri.qty > productReturnAvailableQty(cid, ri.productId));
+        if(overItems.length){
+          const lines = overItems.map(ri=>{
+            const available = productReturnAvailableQty(cid, ri.productId);
+            return `«${ri.name}»: برگشت ${ri.qty} عدد، ولی طبق فروش‌های قبلی فقط ${available} عدد قابل برگشت است`;
+          }).join('\n');
+          const proceed = confirm('⚠️ این برگشت از فروش‌های ثبت‌شده‌ی این مشتری بیشتر است:\n\n'+lines+'\n\nمطمئنی می‌خوای همینطور ثبت کنی؟');
+          if(!proceed) return;
+        }
+      }
+
+      const payment = {id:uid(), customerId:cid, date, amount, method, note, returnItems};
+      data.payments.push(payment);
+      if(method==='return' && returnItems.length){
+        applyReturnStockEffects(returnItems, date, payment);
+      }
+      await saveData(); openCustomerDetail(cid); render(); showToast('ثبت شد');
+    });
+  }
+
+  renderSheet();
+}
+
+function openAddCheck(cid){
+  openSheet(`
+    <h3>ثبت چک جدید</h3>
+    <div class="field"><label>شماره چک (اختیاری)</label><input id="f-num"></div>
+    <div class="field"><label>مبلغ (تومان)</label><input id="f-amount" type="text" inputmode="decimal"></div>
+    <div class="field"><label>تاریخ سررسید</label><input id="f-due" type="date" value="${todayISO()}"></div>
+    <div class="btn-row"><button class="btn" id="save-check">ثبت</button></div>
+  `);
+  document.getElementById('save-check').addEventListener('click', async ()=>{
+    const amount = numVal(document.getElementById('f-amount'));
+    const dueDate = document.getElementById('f-due').value || todayISO();
+    const checkNumber = document.getElementById('f-num').value.trim();
+    if(amount<=0){ showToast('مبلغ رو وارد کن'); return; }
+    data.checks.push({id:uid(), customerId:cid, amount, dueDate, checkNumber, status:'pending'});
+    await saveData(); openCustomerDetail(cid); render(); showToast('چک ثبت شد');
+  });
+}
+
+function openAddVisit(cid){
+  openSheet(`
+    <h3>ثبت ویزیت مشتری</h3>
+    <div class="field"><label>تاریخ</label><input id="f-date" type="date" value="${todayISO()}"></div>
+    <div class="field"><label>ساعت</label><input id="f-time" type="time" value="${nowHHMM()}"></div>
+    <div class="field">
+      <label>نتیجه ویزیت</label>
+      <select id="f-result">${VISIT_RESULTS.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+    </div>
+    <div class="btn-row"><button class="btn" id="save-visit">ثبت ویزیت</button></div>
+  `);
+  document.getElementById('save-visit').addEventListener('click', async ()=>{
+    const c = data.customers.find(x=>x.id===cid);
+    const date = document.getElementById('f-date').value || todayISO();
+    const time = document.getElementById('f-time').value || nowHHMM();
+    const result = document.getElementById('f-result').value;
+    c.visits = c.visits||[];
+    c.visits.push({id:uid(), date, time, result, ordered: result===VISIT_RESULTS[0]});
+    await saveData(); openCustomerDetail(cid); render(); showToast('ویزیت ثبت شد');
+  });
+}
+
+function openCustomerDetail(cid){
+  const c = data.customers.find(x=>x.id===cid);
+  if(!c) return;
+  const t = customerTotals(cid);
+  const st = customerStats(cid);
+  const invs = customerInvoices(cid).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const pays = customerPayments(cid).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const checks = customerChecks(cid).sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate));
+  const visits = (c.visits||[]).slice().sort((a,b)=> new Date(b.date+'T'+(b.time||'00:00')) - new Date(a.date+'T'+(a.time||'00:00')));
+
+  openSheet(`
+    <h3>${esc(c.name)}${c.region?` <span class="sub" style="display:inline;">— ${esc(c.region)}${c.route?' / '+esc(c.route):''}</span>`:''}</h3>
+    ${c.ownerName?`<div class="empty" style="padding:0 0 4px;text-align:right;">صاحب فروشگاه: ${esc(c.ownerName)}</div>`:''}
+    ${c.phone?`<div class="empty" style="padding:0 0 4px;text-align:right;">تلفن: ${esc(c.phone)}</div>`:''}
+    ${c.note?`<div class="empty" style="padding:0 0 8px;text-align:right;">یادداشت: ${esc(c.note)}</div>`:''}
+    ${c.openingBalance?`<div class="empty" style="padding:0 0 8px;text-align:right;">مانده حساب اولیه (قبل از این برنامه): ${toman(Math.abs(c.openingBalance))} ت ${c.openingBalance>0?'بدهکار':'طلبکار'}</div>`:''}
+    <div class="cards">
+      <div class="card"><div class="label">تعداد فاکتور</div><div class="value">${st.count}</div></div>
+      <div class="card"><div class="label">میانگین هر فاکتور</div><div class="value">${toman(st.avgInvoice)} ت</div></div>
+      <div class="card"><div class="label">جمع خرید (فاکتورها)</div><div class="value">${toman(t.invTotal)} ت</div></div>
+      <div class="card"><div class="label">جمع پرداختی (نقد/کارت/انتقال)</div><div class="value">${toman(t.cashOnlyTotal)} ت</div></div>
+      <div class="card"><div class="label">جمع چک‌ها</div><div class="value">${toman(t.checkTotal)} ت</div></div>
+      <div class="card"><div class="label">سود این مشتری</div><div class="value accent-olive">${toman(st.profit)} ت</div></div>
+      <div class="card"><div class="label">اولین خرید</div><div class="value" style="font-size:1rem;">${st.firstInvoiceDate?faDate(st.firstInvoiceDate):'—'}</div></div>
+      <div class="card"><div class="label">آخرین خرید</div><div class="value" style="font-size:1rem;">${st.lastInvoiceDate?faDate(st.lastInvoiceDate):'—'}</div></div>
+      <div class="card wide"><div class="label">مانده حساب</div><div class="value" style="color:${t.balance>0?'var(--rust)':'var(--olive-dark)'}">${toman(Math.abs(t.balance))} ت ${balanceStatusWord(t.balance)}</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="add-invoice">+ فاکتور جدید</button>
+      <button class="btn secondary" id="add-tx">+ ثبت تراکنش</button>
+      <button class="btn secondary" id="add-check">+ ثبت چک</button>
+      <button class="btn secondary" id="add-visit">+ ثبت ویزیت</button>
+      <button class="btn secondary" id="print-statement">چاپ صورتحساب</button>
+      <button class="btn secondary" id="edit-customer">ویرایش مشتری</button>
+      <button class="btn danger" id="del-customer">حذف مشتری</button>
+    </div>
+
+    <h2 class="section-title">فاکتورها</h2>
+    ${invs.length===0?`<div class="empty">فاکتوری ثبت نشده</div>`:invs.map(i=>`
+      <div class="ledger-row" data-open-invoice="${i.id}">
+        <span class="name">#${i.number||'—'} — ${faDate(i.date)}</span>
+        <span class="filler"></span>
+        <span class="amount">${toman(i.total)} ت</span>
+      </div>
+    `).join('')}
+
+    <h2 class="section-title">تراکنش‌ها</h2>
+    ${pays.length===0?`<div class="empty">تراکنشی ثبت نشده</div>`:pays.map(p=>`
+      <div class="ledger-row"><span class="name">${paymentMethodLabel(p.method)}${p.note?` <span class="sub" style="display:inline;">(${esc(p.note)})</span>`:''}</span><span class="filler"></span><span class="amount">${faDate(p.date)} — ${toman(p.amount)} ت</span></div>
+    `).join('')}
+
+    <h2 class="section-title">چک‌ها</h2>
+    ${checks.length===0?`<div class="empty">چکی ثبت نشده</div>`:checks.map(c2=>`
+      <div class="ledger-row" data-toggle-check="${c2.id}">
+        <span class="name">سررسید ${faDate(c2.dueDate)} ${c2.checkNumber?`<span class="sub">شماره: ${esc(c2.checkNumber)}</span>`:''}</span>
+        <span class="filler"></span>
+        <span class="amount">${toman(c2.amount)} ت <span class="badge ${c2.status==='cleared'?'cleared':'pending'}">${c2.status==='cleared'?'وصول شده':'در جریان'}</span></span>
+      </div>
+    `).join('')}
+
+    <h2 class="section-title">ویزیت‌ها</h2>
+    ${visits.length===0?`<div class="empty">ویزیتی ثبت نشده</div>`:visits.map(v=>`
+      <div class="ledger-row"><span class="name">${faDate(v.date)} ${v.time||''}</span><span class="filler"></span>
+      <span class="amount" style="font-size:.78rem;">${esc(v.result)}</span></div>
+    `).join('')}
+  `);
+
+  document.getElementById('add-invoice').addEventListener('click', ()=>openAddInvoice(cid));
+  document.getElementById('add-tx').addEventListener('click', ()=>openAddTransaction(cid));
+  document.getElementById('add-check').addEventListener('click', ()=>openAddCheck(cid));
+  document.getElementById('add-visit').addEventListener('click', ()=>openAddVisit(cid));
+  document.getElementById('print-statement').addEventListener('click', ()=>printCustomerStatement(cid));
+  document.getElementById('edit-customer').addEventListener('click', ()=>openAddCustomer(cid));
+  document.getElementById('del-customer').addEventListener('click', async ()=>{
+    if(!confirm(`مشتری «${c.name}» و همه‌ی فاکتورها/تراکنش‌های او حذف بشه؟`)) return;
+    data.customers = data.customers.filter(x=>x.id!==cid);
+    data.invoices = data.invoices.filter(x=>x.customerId!==cid);
+    data.payments = data.payments.filter(x=>x.customerId!==cid);
+    data.checks = data.checks.filter(x=>x.customerId!==cid);
+    await saveData(); closeModal(); render(); showToast('مشتری حذف شد');
+  });
+  document.querySelectorAll('[data-open-invoice]').forEach(row=>{
+    row.addEventListener('click', ()=>openInvoiceDetail(row.dataset.openInvoice, cid));
+  });
+  document.querySelectorAll('[data-toggle-check]').forEach(row=>{
+    row.addEventListener('click', async ()=>{
+      const chk = data.checks.find(x=>x.id===row.dataset.toggleCheck);
+      chk.status = chk.status==='cleared' ? 'pending' : 'cleared';
+      await saveData(); openCustomerDetail(cid); render();
+    });
+  });
+}
+
+function openInvoiceDetail(invId, cid){
+  const inv = data.invoices.find(x=>x.id===invId);
+  if(!inv) return;
+  const cust = data.customers.find(x=>x.id===cid);
+  const hasSnapshot = typeof inv.prevBalance === 'number';
+  openSheet(`
+    <h3>فاکتور #${inv.number||'—'}</h3>
+    <div class="empty" style="padding:0 0 10px;text-align:right;">
+      مشتری: ${esc(cust?cust.name:'—')} &nbsp;|&nbsp; تاریخ: ${faDate(inv.date)}
+    </div>
+    <table>
+      <tr><th>ردیف</th><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>تخفیف</th><th>جمع</th></tr>
+      ${inv.items.map((it,idx)=>`
+        <tr>
+          <td>${idx+1}</td><td>${esc(it.name)}</td><td>${it.qty}</td>
+          <td>${toman(it.price)} ت</td><td>${it.discount?toman(it.discount)+' ت':'—'}</td>
+          <td>${toman(it.qty*it.price-(it.discount||0))} ت</td>
+        </tr>
+      `).join('')}
+    </table>
+    <div class="ledger-row" style="margin-top:10px;"><span class="name">جمع فاکتور</span><span class="filler"></span><span class="amount">${toman(inv.total)} ت</span></div>
+    ${hasSnapshot ? `
+      <div class="ledger-row"><span class="name">مانده قبلی مشتری</span><span class="filler"></span><span class="amount">${toman(inv.prevBalance)} ت</span></div>
+      <div class="ledger-row"><span class="name">دریافت نقد این فاکتور</span><span class="filler"></span><span class="amount">${toman(inv.cashPaid||0)} ت</span></div>
+      <div class="ledger-row"><span class="name">دریافت کارت این فاکتور</span><span class="filler"></span><span class="amount">${toman(inv.cardPaid||0)} ت</span></div>
+      <div class="ledger-row"><span class="name">دریافت انتقال این فاکتور</span><span class="filler"></span><span class="amount">${toman(inv.transferPaid||0)} ت</span></div>
+      <div class="ledger-row"><span class="name">دریافت چک این فاکتور</span><span class="filler"></span><span class="amount">${toman(inv.checkPaid||0)} ت</span></div>
+      <div class="ledger-row"><span class="name" style="color:${inv.newBalance>0?'var(--rust)':'var(--olive-dark)'}">مانده بعد از این فاکتور</span><span class="filler"></span><span class="amount" style="color:${inv.newBalance>0?'var(--rust)':'var(--olive-dark)'}">${toman(Math.abs(inv.newBalance))} ت ${balanceStatusWord(inv.newBalance)}</span></div>
+    ` : `<div class="empty" style="font-size:.75rem;">این فاکتور قبل از فعال شدن محاسبهٔ خودکار مانده ثبت شده.</div>`}
+    <div class="btn-row">
+      <button class="btn" id="print-inv-detail">چاپ فاکتور</button>
+      <button class="btn secondary" id="image-inv-detail">خروجی تصویر (واتساپ)</button>
+      <button class="btn secondary" id="edit-invoice">ویرایش فاکتور</button>
+      <button class="btn danger" id="del-invoice">حذف فاکتور</button>
+    </div>
+    ${(inv.editHistory && inv.editHistory.length) ? `
+      <h2 class="section-title">تاریخچه ویرایش</h2>
+      ${inv.editHistory.slice().reverse().map(h=>`
+        <div class="ledger-row" style="display:block;">
+          <span class="sub" style="display:block;margin-bottom:4px;">${faDate(h.editedAt.slice(0,10))} ${h.editedAt.slice(11,16)}</span>
+          <span class="name" style="font-weight:400;">جمع قبل: ${toman(h.before.total)} ت ← جمع بعد: ${toman(h.after.total)} ت</span>
+        </div>
+      `).join('')}
+    ` : ''}
+  `);
+  document.getElementById('print-inv-detail').addEventListener('click', ()=>printInvoice(inv.id));
+  document.getElementById('image-inv-detail').addEventListener('click', ()=>exportInvoiceImage(inv.id));
+  document.getElementById('edit-invoice').addEventListener('click', ()=>openEditInvoice(inv.id, cid));
+  document.getElementById('del-invoice').addEventListener('click', async ()=>{
+    if(!confirm('با حذف این فاکتور، موجودی انبار و حساب مشتری اصلاح خواهد شد. ادامه می‌دهید؟')) return;
+    revertInvoiceStockEffects(inv);
+    revertInvoicePayments(inv);
+    data.invoices = data.invoices.filter(x=>x.id!==invId);
+    await saveData(); openCustomerDetail(cid); render(); showToast('فاکتور حذف شد؛ موجودی و حساب مشتری اصلاح شد');
+  });
+}
+
+// ---------- برگشت فروش = ورود کالا به انبار (فقط برای برگشت‌های جدید که کالا مشخص کرده‌اند) ----------
+function applyReturnStockEffects(returnItems, date, payment){
+  returnItems.forEach(ri=>{
+    const prod = data.products.find(p=>p.id===ri.productId);
+    if(prod){
+      prod.stockQty = (prod.stockQty||0) + (ri.qty||0);
+      prod.stockLog = prod.stockLog||[];
+      prod.stockLog.push({id:uid(), date, type:'return', qty:ri.qty||0, note:'برگشت از فروش', paymentId:payment.id});
+    }
+  });
+}
+
+// ---------- shared invoice stock/payment effects (used by both create + edit, so the two flows can't drift apart) ----------
+function applyInvoiceStockEffects(items, date, inv, isNewInvoice){
+  // sale = خروج کالا: deduct stock, log it against this invoice
+  items.forEach(it=>{
+    const prod = data.products.find(p=>p.id===it.productId);
+    if(prod){
+      // قیمت فاکتور (چه پیش‌فرض، چه دستیِ توافقی با یک مشتری خاص) فقط متعلق به همین فاکتور است؛
+      // قیمت رسمی محصول (retail/sell) دیگر هرگز از روی قیمت فاکتور تغییر نمی‌کند —
+      // تغییر قیمت رسمی کالا فقط از فرم «ویرایش کالا» انجام می‌شود.
+      prod.stockQty = (prod.stockQty||0) - it.qty;
+      prod.stockLog = prod.stockLog||[];
+      prod.stockLog.push({id:uid(), date, type:'sale', qty:-it.qty, note:'فروش (فاکتور #'+inv.number+')', invoiceId:inv.id});
+    }
+  });
+}
+function revertInvoiceStockEffects(inv){
+  // undo exactly what applyInvoiceStockEffects did for this invoice's (old) items
+  (inv.items||[]).forEach(it=>{
+    const prod = data.products.find(p=>p.id===it.productId);
+    if(prod){
+      prod.stockQty = (prod.stockQty||0) + it.qty;
+      prod.stockLog = (prod.stockLog||[]).filter(l=>{
+        if(l.invoiceId) return l.invoiceId !== inv.id;
+        // legacy entries (created before invoiceId was tracked) — match by tag+qty instead
+        return !(l.type==='sale' && l.qty===-it.qty && l.note && l.note.includes('فاکتور #'+inv.number+')'));
+      });
+    }
+  });
+}
+function pushInvoicePayments(cid, inv, cashPaid, cardPaid, transferPaid, checkAmount, checkDue, checkMeta){
+  if(cashPaid>0) data.payments.push({id:uid(), customerId:cid, date:inv.date, amount:cashPaid, method:'cash', invoiceId:inv.id});
+  if(cardPaid>0) data.payments.push({id:uid(), customerId:cid, date:inv.date, amount:cardPaid, method:'card', invoiceId:inv.id});
+  if(transferPaid>0) data.payments.push({id:uid(), customerId:cid, date:inv.date, amount:transferPaid, method:'transfer', invoiceId:inv.id});
+  if(checkAmount>0) data.checks.push({id:uid(), customerId:cid, amount:checkAmount, dueDate:checkDue||todayISO(), checkNumber:(checkMeta&&checkMeta.checkNumber)||'', status:(checkMeta&&checkMeta.status)||'pending', invoiceId:inv.id});
+}
+function revertInvoicePayments(inv){
+  data.payments = data.payments.filter(p=>p.invoiceId!==inv.id);
+  data.checks = data.checks.filter(c=>c.invoiceId!==inv.id);
+}
+
+function openAddInvoice(cid){
+  openInvoiceForm(cid, null);
+}
+
+function openEditInvoice(invId, cid){
+  const inv = data.invoices.find(x=>x.id===invId);
+  if(!inv) return;
+  openInvoiceForm(cid, inv);
+}
+
+function openInvoiceForm(cid, editInv){
+  if(data.products.length===0){
+    openSheet(`<h3>اول جنس اضافه کن</h3><div class="empty">برای ${editInv?'ویرایش':'ثبت'} فاکتور، حداقل یک جنس باید تو تب «اجناس و انبار» ثبت شده باشه.</div>`);
+    return;
+  }
+  let rows = editInv
+    ? editInv.items.map(it=>({productId:it.productId, qty:it.qty, price:it.price, discount:it.discount||0, buyPrice:it.buyPrice}))
+    : [{productId:data.products[0].id, qty:1, price:data.products[0].retail||data.products[0].sell||0, discount:0}];
+  const existingCheck = editInv ? data.checks.find(c=>c.invoiceId===editInv.id) : null;
+  let cashPaid = editInv ? (editInv.cashPaid||0) : 0;
+  let cardPaid = editInv ? (editInv.cardPaid||0) : 0;
+  let transferPaid = editInv ? (editInv.transferPaid||0) : 0;
+  let checkAmount = editInv ? (editInv.checkPaid||0) : 0;
+  let checkDue = existingCheck ? existingCheck.dueDate : todayISO();
+  let discount = editInv ? (editInv.discount||0) : 0;
+
+  // "مانده قبلی": مانده مشتری بدون احتساب این فاکتور اصلاً — برای فاکتور جدید یعنی مانده فعلی،
+  // برای ویرایش یعنی مانده فعلی منهای سهم همین فاکتور (چه از بابت جمع فاکتور و چه از بابت پرداختی‌های همراهش)
+  const prevBalance = editInv
+    ? (customerTotals(cid).balance - editInv.total + (editInv.cashPaid||0) + (editInv.cardPaid||0) + (editInv.transferPaid||0) + (editInv.checkPaid||0))
+    : customerTotals(cid).balance;
+
+  function lastSaleToCustomer(productId){
+    const past = data.invoices
+      .filter(inv=>inv.customerId===cid && (!editInv || inv.id!==editInv.id))
+      .flatMap(inv=>inv.items.filter(it=>it.productId===productId).map(it=>({...it, date:inv.date})))
+      .sort((a,b)=>new Date(b.date)-new Date(a.date));
+    return past[0] || null;
+  }
+
+  function itemsHtml(){
+    return rows.map((r,idx)=>{
+      const prod = data.products.find(p=>p.id===r.productId);
+      const lastSale = lastSaleToCustomer(r.productId);
+      const hintParts = [];
+      if(prod){
+        hintParts.push(`خرید شما: ${toman(prod.buy)} ت / عمده: ${toman(prod.wholesale)} ت / مصرف‌کننده: ${toman(prod.retail)} ت`);
+        hintParts.push(`موجودی انبار: ${prod.stockQty||0}`);
+      }
+      if(lastSale) hintParts.push(`آخرین فروش به این مشتری: ${toman(lastSale.price)} ت (${faDate(lastSale.date)}) — ${lastSale.qty} عدد`);
+      return `
+      <div class="field" style="display:flex;gap:6px;align-items:end;">
+        <div style="flex:2;">
+          <label>جنس</label>
+          <select data-row="${idx}" class="row-product">
+            ${data.products.map(p=>`<option value="${p.id}" ${p.id===r.productId?'selected':''}>${esc(p.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label>تعداد</label>
+          <input type="text" inputmode="decimal" data-row="${idx}" class="row-qty" value="${r.qty}">
+        </div>
+        <div style="flex:1;">
+          <label>قیمت واحد</label>
+          <input type="text" inputmode="decimal" data-row="${idx}" class="row-price" value="${r.price}">
+        </div>
+        <div style="flex:1;">
+          <label>تخفیف</label>
+          <input type="text" inputmode="decimal" data-row="${idx}" class="row-discount" value="${r.discount||''}">
+        </div>
+      </div>
+      ${hintParts.length?`<div class="sub" style="margin:-6px 0 10px;">${hintParts.join(' — ')}</div>`:''}
+    `;
+    }).join('');
+  }
+
+  function invoiceTotal(){
+    return Math.max(0, rows.reduce((s,r)=>s+(r.qty*r.price-(r.discount||0)),0) - discount);
+  }
+
+  function updateSummary(){
+    const total = invoiceTotal();
+    const paid = cashPaid+cardPaid+transferPaid+checkAmount;
+    const newBalance = prevBalance + total - paid;
+    document.getElementById('calc-summary').innerHTML = `
+      <div class="ledger-row"><span class="name">مانده قبلی مشتری</span><span class="filler"></span><span class="amount">${toman(prevBalance)} ت</span></div>
+      <div class="ledger-row"><span class="name">جمع اقلام (با تخفیف هر ردیف)</span><span class="filler"></span><span class="amount">${toman(rows.reduce((s,r)=>s+(r.qty*r.price-(r.discount||0)),0))} ت</span></div>
+      <div class="ledger-row"><span class="name">تخفیف کلی فاکتور</span><span class="filler"></span><span class="amount">${toman(discount)} ت</span></div>
+      <div class="ledger-row"><span class="name">جمع این فاکتور</span><span class="filler"></span><span class="amount">${toman(total)} ت</span></div>
+      <div class="ledger-row"><span class="name">جمع دریافتی</span><span class="filler"></span><span class="amount">${toman(paid)} ت</span></div>
+      <div class="ledger-row"><span class="name" style="color:${newBalance>0?'var(--rust)':'var(--olive-dark)'}">مانده جدید</span><span class="filler"></span><span class="amount" style="color:${newBalance>0?'var(--rust)':'var(--olive-dark)'}">${toman(Math.abs(newBalance))} ت ${balanceStatusWord(newBalance)}</span></div>
+    `;
+  }
+
+  function renderSheet(){
+    openSheet(`
+      <h3>${editInv?('ویرایش فاکتور #'+(editInv.number||'—')):'فاکتور جدید'}</h3>
+      ${editInv?`<div class="empty" style="padding:0 0 8px;text-align:right;">با ذخیره‌ی این ویرایش، موجودی انبار و مانده حساب مشتری به‌طور خودکار اصلاح می‌شود.</div>`:''}
+      <div class="field"><label>تاریخ</label><input id="f-date" type="date" value="${editInv?editInv.date:todayISO()}"></div>
+      <div id="items-wrap">${itemsHtml()}</div>
+      <button class="btn secondary small" id="add-row">+ افزودن قلم</button>
+
+      <h2 class="section-title">دریافتی همراه این فاکتور (اختیاری)</h2>
+      <div class="field" style="display:flex;gap:8px;">
+        <div style="flex:1;"><label>نقد</label><input id="f-cash" type="text" inputmode="decimal" value="${cashPaid||''}"></div>
+        <div style="flex:1;"><label>کارت</label><input id="f-card" type="text" inputmode="decimal" value="${cardPaid||''}"></div>
+        <div style="flex:1;"><label>انتقال بانکی</label><input id="f-transfer" type="text" inputmode="decimal" value="${transferPaid||''}"></div>
+      </div>
+      <div class="field"><label>دریافت چک</label><input id="f-check" type="text" inputmode="decimal" value="${checkAmount||''}"></div>
+      <div class="field" id="check-due-wrap" style="display:${checkAmount>0?'block':'none'};">
+        <label>تاریخ سررسید چک</label><input id="f-check-due" type="date" value="${checkDue}">
+      </div>
+
+      <div class="field"><label>تخفیف کلی فاکتور (تومان، اختیاری)</label><input id="f-discount" type="text" inputmode="decimal" value="${discount||''}"></div>
+
+      <h2 class="section-title">محاسبه خودکار</h2>
+      <div id="calc-summary"></div>
+
+      <div class="btn-row"><button class="btn" id="save-invoice">${editInv?'ذخیره ویرایش':'ثبت فاکتور'}</button></div>
+    `);
+    updateSummary();
+
+    document.getElementById('add-row').addEventListener('click', ()=>{
+      const dp = data.products[0];
+      rows.push({productId:dp.id, qty:1, price:dp.retail||dp.sell||0, discount:0});
+      renderSheet();
+    });
+    document.querySelectorAll('.row-product').forEach(el=>el.addEventListener('change', e=>{
+      const i = e.target.dataset.row;
+      rows[i].productId = e.target.value;
+      delete rows[i].buyPrice;
+      const prod = data.products.find(p=>p.id===e.target.value);
+      rows[i].price = prod.retail||prod.sell||0;
+      renderSheet();
+    }));
+    document.querySelectorAll('.row-qty').forEach(el=>el.addEventListener('input', e=>{
+      rows[e.target.dataset.row].qty = parseFloat(faToEnDigits(e.target.value))||0;
+      updateSummary();
+    }));
+    document.querySelectorAll('.row-price').forEach(el=>el.addEventListener('input', e=>{
+      rows[e.target.dataset.row].price = parseFloat(faToEnDigits(e.target.value))||0;
+      updateSummary();
+    }));
+    document.querySelectorAll('.row-discount').forEach(el=>el.addEventListener('input', e=>{
+      rows[e.target.dataset.row].discount = parseFloat(faToEnDigits(e.target.value))||0;
+      updateSummary();
+    }));
+    document.getElementById('f-cash').addEventListener('input', e=>{ cashPaid = parseFloat(faToEnDigits(e.target.value))||0; updateSummary(); });
+    document.getElementById('f-card').addEventListener('input', e=>{ cardPaid = parseFloat(faToEnDigits(e.target.value))||0; updateSummary(); });
+    document.getElementById('f-transfer').addEventListener('input', e=>{ transferPaid = parseFloat(faToEnDigits(e.target.value))||0; updateSummary(); });
+    document.getElementById('f-check').addEventListener('input', e=>{
+      checkAmount = parseFloat(faToEnDigits(e.target.value))||0;
+      document.getElementById('check-due-wrap').style.display = checkAmount>0 ? 'block':'none';
+      updateSummary();
+    });
+    document.getElementById('f-check-due').addEventListener('change', e=>{ checkDue = e.target.value; });
+    document.getElementById('f-discount').addEventListener('input', e=>{
+      discount = parseFloat(faToEnDigits(e.target.value))||0;
+      updateSummary();
+    });
+
+    document.getElementById('save-invoice').addEventListener('click', async (e)=>{
+      const btn = e.currentTarget;
+      if(btn.disabled) return; // جلوگیری از ثبت دوباره با کلیک سریع/پی‌درپی
+      btn.disabled = true;
+      const date = document.getElementById('f-date').value || todayISO();
+
+      // اعتبارسنجی مقادیر ردیف‌های فاکتور قبل از ذخیره: تعداد باید بزرگ‌تر از صفر، قیمت/تخفیف نباید منفی باشند
+      const invalidRow = rows.find(r=> !(r.qty>0) || r.price<0 || (r.discount||0)<0);
+      if(invalidRow){
+        alert('مقادیر فاکتور نامعتبر است.\n\nتعداد هر ردیف باید بزرگ‌تر از صفر باشد و قیمت/تخفیف نباید منفی باشند.');
+        btn.disabled = false;
+        return;
+      }
+      if(discount<0){
+        alert('تخفیف کلی فاکتور نمی‌تواند منفی باشد.');
+        btn.disabled = false;
+        return;
+      }
+
+      const items = rows.map(r=>{
+        const prod = data.products.find(p=>p.id===r.productId);
+        return { productId:r.productId, name:prod.name, qty:r.qty, price:r.price, buyPrice:(r.buyPrice!==undefined?r.buyPrice:prod.buy), discount:r.discount||0, weight:(prod.packageWeight||0)*r.qty };
+      });
+
+      // جلوگیری از موجودی منفی: قبل از هر تغییری، مجموع مقدار درخواستی هر کالا رو با موجودی قابل استفاده مقایسه کن
+      const neededByProduct = {};
+      items.forEach(it=>{ neededByProduct[it.productId] = (neededByProduct[it.productId]||0) + it.qty; });
+      const oldQtyByProduct = {};
+      if(editInv){ (editInv.items||[]).forEach(it=>{ oldQtyByProduct[it.productId] = (oldQtyByProduct[it.productId]||0) + it.qty; }); }
+      const shortages = [];
+      Object.keys(neededByProduct).forEach(pid=>{
+        const prod = data.products.find(p=>p.id===pid);
+        if(!prod) return;
+        const available = (prod.stockQty||0) + (oldQtyByProduct[pid]||0);
+        if(neededByProduct[pid] > available) shortages.push(`${prod.name}\nموجودی فعلی: ${available}\nمقدار درخواستی: ${neededByProduct[pid]}`);
+      });
+      if(shortages.length){ alert('موجودی کالا کافی نیست.\n\n'+shortages.join('\n\n')); btn.disabled = false; return; }
+
+      const total = invoiceTotal();
+      const paid = cashPaid+cardPaid+transferPaid+checkAmount;
+      const newBalance = prevBalance + total - paid;
+
+      if(editInv){
+        if(!confirm('با ویرایش این فاکتور، موجودی انبار و حساب مشتری اصلاح خواهد شد. ادامه می‌دهید؟')){ btn.disabled = false; return; }
+
+        // snapshot قبل از تغییر، برای تاریخچه
+        const before = {
+          date:editInv.date, items:editInv.items, total:editInv.total, discount:editInv.discount,
+          cashPaid:editInv.cashPaid||0, cardPaid:editInv.cardPaid||0, transferPaid:editInv.transferPaid||0, checkPaid:editInv.checkPaid||0,
+        };
+        const checkMeta = existingCheck ? {checkNumber:existingCheck.checkNumber, status:existingCheck.status} : null;
+
+        // ۱) برگردوندن اثر فاکتور قبلی: موجودی کالاها + حذف پرداخت/چک مرتبط با همین فاکتور
+        revertInvoiceStockEffects(editInv);
+        revertInvoicePayments(editInv);
+
+        // ۲) به‌روزرسانی خود فاکتور با مقادیر جدید (همون id و شماره فاکتور حفظ می‌مونه)
+        editInv.date = date; editInv.items = items; editInv.total = total; editInv.discount = discount;
+        editInv.prevBalance = prevBalance; editInv.cashPaid = cashPaid; editInv.cardPaid = cardPaid;
+        editInv.transferPaid = transferPaid; editInv.checkPaid = checkAmount; editInv.newBalance = newBalance;
+
+        // ۳) اعمال دوباره‌ی موجودی/پرداخت‌ها با همون توابعی که برای ثبت فاکتور جدید استفاده میشه
+        applyInvoiceStockEffects(items, date, editInv, false);
+        pushInvoicePayments(cid, editInv, cashPaid, cardPaid, transferPaid, checkAmount, checkDue, checkMeta);
+
+        // ۴) ثبت این ویرایش در تاریخچه‌ی خود فاکتور
+        editInv.editHistory = editInv.editHistory||[];
+        editInv.editHistory.push({
+          id:uid(), editedAt:new Date().toISOString(),
+          before, after:{date, items, total, discount, cashPaid, cardPaid, transferPaid, checkPaid:checkAmount},
+        });
+
+        await saveData(); closeModal(); openInvoiceDetail(editInv.id, cid); render();
+        showToast('فاکتور ویرایش شد؛ موجودی و حساب مشتری اصلاح شد');
+        return;
+      }
+
+      const newInv = {
+        id:uid(), number:nextInvoiceNumber(), customerId:cid, date, items, total, discount,
+        prevBalance, cashPaid, cardPaid, transferPaid, checkPaid:checkAmount, newBalance,
+      };
+      data.invoices.push(newInv);
+      applyInvoiceStockEffects(items, date, newInv, true);
+      pushInvoicePayments(cid, newInv, cashPaid, cardPaid, transferPaid, checkAmount, checkDue, null);
+      await saveData(); render(); showToast('فاکتور ثبت شد');
+      openSheet(`
+        <h3>فاکتور ثبت و توی حساب مشتری ذخیره شد</h3>
+        <div class="empty">حالا می‌خوای همین فاکتور رو چاپ کنی، تصویرش رو بگیری یا فقط ذخیره بمونه؟</div>
+        <div class="btn-row">
+          <button class="btn" id="print-now">چاپ فاکتور</button>
+          <button class="btn secondary" id="image-now">خروجی تصویر (واتساپ)</button>
+          <button class="btn secondary" id="skip-print">فقط ذخیره بمونه</button>
+        </div>
+      `);
+      document.getElementById('print-now').addEventListener('click', ()=>{
+        closeModal();
+        setTimeout(()=>printInvoice(newInv.id), 50);
+      });
+      document.getElementById('image-now').addEventListener('click', async ()=>{
+        await exportInvoiceImage(newInv.id);
+        closeModal(); openCustomerDetail(cid);
+      });
+      document.getElementById('skip-print').addEventListener('click', ()=>{
+        closeModal(); openCustomerDetail(cid);
+      });
+    });
+  }
+  renderSheet();
+}
+
+// ---------- suppliers ----------
+function openAddSupplier(){
+  openSheet(`
+    <h3>تامین‌کننده جدید</h3>
+    <div class="field"><label>نام تامین‌کننده</label><input id="f-name"></div>
+    <div class="field"><label>شماره تماس (اختیاری)</label><input id="f-phone"></div>
+    <div class="field">
+      <label>مانده بدهی اولیه به این تامین‌کننده (تومان)</label>
+      <input id="f-opening" type="text" inputmode="decimal">
+      <div class="empty" style="padding:4px 0 0;text-align:right;font-size:.75rem;">بدهی که از قبل از استفاده از این برنامه داری رو اینجا بزن.</div>
+    </div>
+    <div class="btn-row"><button class="btn" id="save-supplier">ذخیره</button></div>
+  `);
+  document.getElementById('save-supplier').addEventListener('click', async ()=>{
+    const name = document.getElementById('f-name').value.trim();
+    if(!name){ showToast('نام تامین‌کننده رو وارد کن'); return; }
+    const phone = document.getElementById('f-phone').value.trim();
+    const openingBalance = numVal(document.getElementById('f-opening'));
+    data.suppliers.push({id:uid(), name, phone, openingBalance, purchases:[], payments:[]});
+    await saveData(); closeModal(); render(); showToast('تامین‌کننده اضافه شد');
+  });
+}
+
+function openSupplierDetail(sid){
+  const s = data.suppliers.find(x=>x.id===sid);
+  if(!s) return;
+  const t = supplierTotals(sid);
+  const purchases = (s.purchases||[]).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const payments = (s.payments||[]).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  openSheet(`
+    <h3>${esc(s.name)}</h3>
+    ${s.phone?`<div class="empty" style="padding:0 0 8px;text-align:right;">تلفن: ${esc(s.phone)}</div>`:''}
+    ${s.openingBalance?`<div class="empty" style="padding:0 0 8px;text-align:right;">مانده بدهی اولیه (قبل از این برنامه): ${toman(Math.abs(s.openingBalance))} ت</div>`:''}
+    <div class="cards">
+      <div class="card"><div class="label">جمع خرید</div><div class="value">${toman(t.purchaseTotal)} ت</div></div>
+      <div class="card"><div class="label">مانده بدهی شما</div><div class="value" style="color:${t.balance>0?'var(--red)':'var(--olive-dark)'}">${toman(Math.abs(t.balance))} ت</div></div>
+      ${t.returnTotal>0?`<div class="card"><div class="label">جمع برگشتی</div><div class="value">${toman(t.returnTotal)} ت</div></div>`:''}
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="add-purchase">+ خرید جدید</button>
+      <button class="btn secondary" id="add-suppay">+ پرداخت</button>
+      <button class="btn secondary" id="edit-supplier">ویرایش</button>
+      <button class="btn danger" id="del-supplier">حذف تامین‌کننده</button>
+    </div>
+    <h2 class="section-title">خریدها</h2>
+    ${purchases.length===0?`<div class="empty">خریدی ثبت نشده</div>`:purchases.map(p=>{
+      const returnedQty = (p.returns||[]).reduce((a,r)=>a+(r.qty||0),0);
+      const returnedAmount = (p.returns||[]).reduce((a,r)=>a+(r.amount||0),0);
+      const remainingAmount = p.amount - returnedAmount;
+      return `
+      <div class="ledger-row"><span class="name">${faDate(p.date)} ${p.desc?`<span class="sub">${esc(p.desc)}</span>`:''}${p.productId?`<span class="sub">${esc((data.products.find(x=>x.id===p.productId)||{}).name||'')} × ${p.qty}</span>`:''}${returnedAmount>0?`<span class="sub">برگشت‌شده: ${toman(returnedAmount)} ت${p.productId?` (${returnedQty} از ${p.qty})`:''}</span>`:''}</span><span class="filler"></span><span class="amount">${toman(p.amount)} ت${remainingAmount>0?`<br><button class="btn secondary small" data-return-purchase="${p.id}">برگشت</button>`:''}</span></div>
+    `;}).join('')}
+    <h2 class="section-title">پرداختی‌ها</h2>
+    ${payments.length===0?`<div class="empty">پرداختی ثبت نشده</div>`:payments.map(p=>`
+      <div class="ledger-row"><span class="name">${faDate(p.date)}</span><span class="filler"></span><span class="amount">${toman(p.amount)} ت</span></div>
+    `).join('')}
+  `);
+  document.getElementById('add-purchase').addEventListener('click', ()=>{
+    openSheet(`
+      <h3>خرید جدید از ${esc(s.name)}</h3>
+      <div class="field"><label>تاریخ</label><input id="f-date" type="date" value="${todayISO()}"></div>
+      <div class="field"><label>مبلغ کل خرید (تومان)</label><input id="f-amount" type="text" inputmode="decimal"></div>
+      <div class="field">
+        <label>کالای مرتبط (اختیاری — برای افزایش خودکار موجودی)</label>
+        <select id="f-product">
+          <option value="">— بدون کالای مشخص —</option>
+          ${data.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>تعداد کالا (در صورت انتخاب کالا)</label><input id="f-qty" type="text" inputmode="decimal"></div>
+      <div class="field"><label>توضیح (اختیاری)</label><input id="f-desc"></div>
+      <div class="btn-row"><button class="btn" id="save-purchase">ثبت</button></div>
+    `);
+    document.getElementById('save-purchase').addEventListener('click', async ()=>{
+      const amount = numVal(document.getElementById('f-amount'));
+      const date = document.getElementById('f-date').value || todayISO();
+      const desc = document.getElementById('f-desc').value.trim();
+      const productId = document.getElementById('f-product').value;
+      const qty = numVal(document.getElementById('f-qty'));
+      if(amount<=0){ showToast('مبلغ رو وارد کن'); return; }
+      s.purchases = s.purchases||[];
+      s.purchases.push({id:uid(), date, amount, desc, productId, qty});
+      if(productId && qty>0){
+        const prod = data.products.find(x=>x.id===productId);
+        if(prod){
+          prod.stockQty = (prod.stockQty||0) + qty;
+          prod.stockLog = prod.stockLog||[];
+          prod.stockLog.push({id:uid(), date, type:'in', qty, note:'خرید از '+s.name});
+        }
+      }
+      await saveData(); openSupplierDetail(sid); render(); showToast('خرید ثبت شد');
+    });
+  });
+  document.getElementById('add-suppay').addEventListener('click', ()=>{
+    openSheet(`
+      <h3>پرداخت به ${esc(s.name)}</h3>
+      <div class="field"><label>تاریخ</label><input id="f-date" type="date" value="${todayISO()}"></div>
+      <div class="field"><label>مبلغ (تومان)</label><input id="f-amount" type="text" inputmode="decimal"></div>
+      <div class="btn-row"><button class="btn" id="save-suppay">ثبت</button></div>
+    `);
+    document.getElementById('save-suppay').addEventListener('click', async ()=>{
+      const amount = numVal(document.getElementById('f-amount'));
+      const date = document.getElementById('f-date').value || todayISO();
+      if(amount<=0){ showToast('مبلغ رو وارد کن'); return; }
+      s.payments = s.payments||[];
+      s.payments.push({date, amount});
+      await saveData(); openSupplierDetail(sid); render(); showToast('پرداخت ثبت شد');
+    });
+  });
+  document.getElementById('edit-supplier').addEventListener('click', ()=>{
+    openSheet(`
+      <h3>ویرایش تامین‌کننده</h3>
+      <div class="field"><label>نام</label><input id="f-name" value="${esc(s.name)}"></div>
+      <div class="field"><label>شماره تماس</label><input id="f-phone" value="${esc(s.phone||'')}"></div>
+      <div class="field">
+        <label>مانده بدهی اولیه (تومان) — برای اصلاح مانده</label>
+        <input id="f-opening" type="text" inputmode="decimal" value="${s.openingBalance?s.openingBalance:''}">
+      </div>
+      <div class="btn-row"><button class="btn" id="save-sup-edit">ذخیره</button></div>
+    `);
+    document.getElementById('save-sup-edit').addEventListener('click', async ()=>{
+      const name = document.getElementById('f-name').value.trim();
+      if(!name){ showToast('نام رو وارد کن'); return; }
+      s.name = name; s.phone = document.getElementById('f-phone').value.trim();
+      s.openingBalance = numVal(document.getElementById('f-opening'));
+      await saveData(); openSupplierDetail(sid); render(); showToast('ذخیره شد');
+    });
+  });
+  document.getElementById('del-supplier').addEventListener('click', async ()=>{
+    if(!confirm(`تامین‌کننده «${s.name}» حذف بشه؟`)) return;
+    data.suppliers = data.suppliers.filter(x=>x.id!==sid);
+    await saveData(); closeModal(); render(); showToast('حذف شد');
+  });
+  document.querySelectorAll('[data-return-purchase]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const p = (s.purchases||[]).find(x=>x.id===btn.dataset.returnPurchase);
+      if(!p) return;
+      const returnedQtySoFar = (p.returns||[]).reduce((a,r)=>a+(r.qty||0),0);
+      const returnedAmountSoFar = (p.returns||[]).reduce((a,r)=>a+(r.amount||0),0);
+      const remainingQty = p.productId ? (p.qty - returnedQtySoFar) : 0;
+      const remainingAmount = p.amount - returnedAmountSoFar;
+      const unitPrice = (p.productId && p.qty>0) ? (p.amount/p.qty) : 0;
+      openSheet(`
+        <h3>برگشت خرید از ${esc(s.name)}</h3>
+        <div class="empty" style="padding:0 0 8px;text-align:right;">${faDate(p.date)}${p.productId?` — ${esc((data.products.find(x=>x.id===p.productId)||{}).name||'')}`:''} — مبلغ کل: ${toman(p.amount)} ت${p.productId?` (${p.qty})`:''}${returnedAmountSoFar>0?` — قبلاً برگشت‌شده: ${toman(returnedAmountSoFar)} ت`:''}</div>
+        <div class="field"><label>تاریخ برگشت</label><input id="f-ret-date" type="date" value="${todayISO()}"></div>
+        ${p.productId?`<div class="field"><label>مقدار برگشتی (حداکثر ${remainingQty})</label><input id="f-ret-qty" type="text" inputmode="decimal"></div>`:''}
+        <div class="field"><label>مبلغ برگشتی (تومان، حداکثر ${toman(remainingAmount)})</label><input id="f-ret-amount" type="text" inputmode="decimal"></div>
+        <div class="btn-row"><button class="btn" id="save-return">ثبت برگشت</button></div>
+      `);
+      if(p.productId){
+        document.getElementById('f-ret-qty').addEventListener('input', ()=>{
+          const q = numVal(document.getElementById('f-ret-qty'));
+          if(unitPrice>0) document.getElementById('f-ret-amount').value = Math.round(q*unitPrice);
+        });
+      }
+      document.getElementById('save-return').addEventListener('click', async ()=>{
+        const date = document.getElementById('f-ret-date').value || todayISO();
+        const qty = p.productId ? numVal(document.getElementById('f-ret-qty')) : 0;
+        const amount = numVal(document.getElementById('f-ret-amount'));
+        if(amount<=0){ showToast('مبلغ برگشتی رو وارد کن'); return; }
+        if(p.productId && qty<=0){ showToast('مقدار برگشتی رو وارد کن'); return; }
+        if(p.productId && qty>remainingQty){ alert('مقدار برگشتی از باقیمانده‌ی قابل‌برگشت این خرید بیشتره.\n\nباقیمانده قابل‌برگشت: '+remainingQty); return; }
+        if(p.productId && qty>0){
+          const realStockProd = data.products.find(x=>x.id===p.productId);
+          if(realStockProd && qty > (realStockProd.stockQty||0)){
+            alert('موجودی واقعی «'+realStockProd.name+'» در انبار فقط '+(realStockProd.stockQty||0)+' عدد است.\n\nمقدار برگشتی نمی‌تواند از موجودی واقعی قابل‌برگشت بیشتر باشد.');
+            return;
+          }
+        }
+        if(amount>remainingAmount){ alert('مبلغ برگشتی از مبلغ باقیمانده‌ی این خرید بیشتره.\n\nمبلغ باقیمانده قابل‌برگشت: '+toman(remainingAmount)+' تومان'); return; }
+        if(!confirm('با ثبت این برگشت، موجودی انبار و بدهی به تامین‌کننده اصلاح خواهد شد. ادامه می‌دهید؟')) return;
+        p.returns = p.returns||[];
+        p.returns.push({id:uid(), date, qty, amount});
+        if(p.productId && qty>0){
+          const prod = data.products.find(x=>x.id===p.productId);
+          if(prod){
+            prod.stockQty = (prod.stockQty||0) - qty;
+            prod.stockLog = prod.stockLog||[];
+            prod.stockLog.push({id:uid(), date, type:'out', qty:-qty, note:'برگشت خرید به '+s.name});
+          }
+        }
+        await saveData(); openSupplierDetail(sid); render(); showToast('برگشت خرید ثبت شد');
+      });
+    });
+  });
+}
+
+// ---------- init ----------
+(async function init(){
+  await loadData();
+  render();
+})();
+</script>
+</body>
+</html>
